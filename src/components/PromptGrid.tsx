@@ -163,10 +163,10 @@ export default function PromptGrid() {
       <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
         {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
           <div key={i} className="break-inside-avoid mb-6">
-            <div className="bg-white rounded-3xl p-6 shadow-sm animate-pulse">
-              <div className="h-4 bg-gray-100 rounded mb-4 w-1/3"></div>
-              <div className="h-32 bg-gray-100 rounded mb-4"></div>
-              <div className="h-6 bg-gray-100 rounded w-20"></div>
+            <div className="bg-gray-800/50 rounded-2xl p-6 animate-pulse border border-gray-700/50">
+              <div className="h-4 bg-gray-700 rounded mb-4 w-1/3"></div>
+              <div className="h-32 bg-gray-700 rounded mb-4"></div>
+              <div className="h-6 bg-gray-700 rounded w-20"></div>
             </div>
           </div>
         ))}
@@ -176,60 +176,60 @@ export default function PromptGrid() {
 
   return (
     <div className="space-y-12">
-      {/* Simple Header */}
+      {/* Simple Header - Dark Theme */}
       <div className="mb-8">
-        {/* Search Bar - Subtle and Clean */}
+        {/* Search Bar - Dark */}
         <div className="max-w-sm mx-auto relative">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
           <Input
-            placeholder="Search..."
+            placeholder="Search prompts..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-12 py-2.5 rounded-full border-0 bg-white/60 backdrop-blur-sm focus:bg-white/80 transition-all shadow-sm text-sm"
+            className="pl-12 py-2.5 rounded-full border-0 bg-gray-800/50 backdrop-blur-sm focus:bg-gray-800/70 transition-all shadow-sm text-sm text-gray-200 placeholder-gray-500"
           />
         </div>
       </div>
 
-      {/* Filter Tabs - Minimal Design */}
+      {/* Filter Tabs - Dark Theme */}
       <Tabs defaultValue="all" className="w-full">
         <div className="flex justify-center mb-8">
-          <TabsList className="bg-white/50 backdrop-blur-sm p-1 rounded-full shadow-sm">
+          <TabsList className="bg-gray-800/50 backdrop-blur-sm p-1 rounded-full shadow-sm border border-gray-700/50">
             <TabsTrigger
               value="all"
-              className="rounded-full px-4 py-1.5 text-sm"
+              className="rounded-full px-4 py-1.5 text-sm text-gray-300 data-[state=active]:text-white data-[state=active]:bg-gray-700"
             >
               All
             </TabsTrigger>
             <TabsTrigger
               value="trending"
-              className="rounded-full px-4 py-1.5 text-sm"
+              className="rounded-full px-4 py-1.5 text-sm text-gray-300 data-[state=active]:text-white data-[state=active]:bg-gray-700"
             >
               Popular
             </TabsTrigger>
             <TabsTrigger
               value="recent"
-              className="rounded-full px-4 py-1.5 text-sm"
+              className="rounded-full px-4 py-1.5 text-sm text-gray-300 data-[state=active]:text-white data-[state=active]:bg-gray-700"
             >
               Recent
             </TabsTrigger>
             <TabsTrigger
               value="writing"
-              className="rounded-full px-4 py-1.5 text-sm"
+              className="rounded-full px-4 py-1.5 text-sm text-gray-300 data-[state=active]:text-white data-[state=active]:bg-gray-700"
             >
               Writing
             </TabsTrigger>
             <TabsTrigger
               value="coding"
-              className="rounded-full px-4 py-1.5 text-sm"
+              className="rounded-full px-4 py-1.5 text-sm text-gray-300 data-[state=active]:text-white data-[state=active]:bg-gray-700"
             >
               Coding
             </TabsTrigger>
           </TabsList>
         </div>
 
-        {/* Results Count - Subtle */}
+        {/* Results Count - Dark */}
         <div className="text-center mb-6">
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-gray-500">
             {getFilteredPrompts("all").length} prompts
           </p>
         </div>
@@ -295,14 +295,14 @@ export default function PromptGrid() {
         </TabsContent>
       </Tabs>
 
-      {/* Empty State */}
+      {/* Empty State - Dark */}
       {getFilteredPrompts("all").length === 0 && (
         <div className="text-center py-20">
           <div className="text-6xl mb-6">🔍</div>
-          <h3 className="text-xl font-light text-gray-600 mb-2">
+          <h3 className="text-xl font-light text-gray-300 mb-2">
             No prompts found
           </h3>
-          <p className="text-gray-400">
+          <p className="text-gray-500">
             Try adjusting your search or browse different categories
           </p>
         </div>
