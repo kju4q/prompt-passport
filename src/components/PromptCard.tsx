@@ -36,7 +36,7 @@ export default function PromptCard({ prompt, onUse }: PromptCardProps) {
       setCurrentUsageCount((prev) => prev + 1);
       onUse?.(prompt.id);
 
-      toast.success("Copied! ✨", {
+      toast.success("Copied!", {
         description: "Ready to use in your AI tool",
       });
 
@@ -49,23 +49,23 @@ export default function PromptCard({ prompt, onUse }: PromptCardProps) {
 
   const handleBookmark = () => {
     setIsBookmarked(!isBookmarked);
-    toast.success(isBookmarked ? "Removed" : "Saved! 💫");
+    toast.success(isBookmarked ? "Removed" : "Saved!");
   };
 
   const getSourceEmoji = (source: string) => {
     switch (source.toLowerCase()) {
       case "twitter":
-        return "🐦";
+        return "";
       case "tiktok":
-        return "📱";
+        return "";
       case "github":
-        return "🐙";
+        return "";
       case "manual":
-        return "✍️";
+        return "";
       case "community":
-        return "✨";
+        return "";
       default:
-        return "🌸";
+        return "";
     }
   };
 
@@ -73,8 +73,8 @@ export default function PromptCard({ prompt, onUse }: PromptCardProps) {
     <div className="group relative break-inside-avoid mb-6">
       {/* Main Card */}
       <div className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1 border-0 relative overflow-hidden">
-        {/* Subtle gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-transparent to-purple-50/20 pointer-events-none"></div>
+        {/* Subtle warm overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-50/20 via-transparent to-pink-50/10 pointer-events-none"></div>
 
         {/* Content */}
         <div className="relative z-10">
@@ -89,7 +89,7 @@ export default function PromptCard({ prompt, onUse }: PromptCardProps) {
 
             <button
               onClick={handleBookmark}
-              className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-1 hover:bg-gray-50 rounded-full"
+              className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-1 hover:bg-gray-50 rounded-full cursor-pointer"
             >
               <Bookmark
                 className={`h-4 w-4 transition-colors ${
@@ -133,7 +133,7 @@ export default function PromptCard({ prompt, onUse }: PromptCardProps) {
               disabled={isUsed}
               size="sm"
               className={`
-                rounded-full font-medium text-sm px-6 transition-all duration-300
+                rounded-full font-medium text-sm px-6 transition-all duration-300 cursor-pointer
                 ${
                   isUsed
                     ? "bg-green-100 text-green-700 hover:bg-green-100 shadow-none"

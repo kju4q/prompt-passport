@@ -4,13 +4,14 @@ import { Plus, Heart } from "lucide-react";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-white to-pink-50/30">
       {/* Header - Pinterest Style */}
-      <header className="bg-white/90 backdrop-blur-xl border-b border-gray-100/50 sticky top-0 z-50">
+      <header className="backdrop-blur-xl border-b border-gray-100/50 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3">
+                <div className="text-3xl"></div>
                 <div>
                   <h1 className="text-2xl font-light text-gray-800 tracking-tight">
                     Prompt Passport
@@ -21,7 +22,7 @@ export default function HomePage() {
             </div>
 
             <Button
-              className="bg-gray-900 hover:bg-gray-800 text-white rounded-full px-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+              className="bg-gray-900 hover:bg-gray-800 text-white rounded-full px-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
               size="sm"
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -47,13 +48,13 @@ export default function HomePage() {
             </div>
 
             <div className="flex justify-center gap-8 text-sm text-gray-400 font-light">
-              <button className="hover:text-gray-600 transition-colors">
+              <button className="hover:text-gray-600 transition-colors cursor-pointer">
                 About
               </button>
-              <button className="hover:text-gray-600 transition-colors">
+              <button className="hover:text-gray-600 transition-colors cursor-pointer">
                 Privacy
               </button>
-              <button className="hover:text-gray-600 transition-colors">
+              <button className="hover:text-gray-600 transition-colors cursor-pointer">
                 Support
               </button>
             </div>

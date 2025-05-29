@@ -176,70 +176,61 @@ export default function PromptGrid() {
 
   return (
     <div className="space-y-12">
-      {/* Hero Section - Clean and Minimal */}
-      <div className="text-center space-y-6">
-        <div className="space-y-3">
-          <h1 className="text-5xl font-light text-gray-800 tracking-tight">
-            Discover Prompts
-          </h1>
-          <p className="text-gray-500 text-lg font-light max-w-2xl mx-auto leading-relaxed">
-            A curated collection of AI prompts from creators around the world
-          </p>
-        </div>
-
-        {/* Search Bar - Pinterest Style */}
-        <div className="max-w-md mx-auto relative">
+      {/* Simple Header */}
+      <div className="mb-8">
+        {/* Search Bar - Subtle and Clean */}
+        <div className="max-w-sm mx-auto relative">
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
-            placeholder="Search prompts..."
+            placeholder="Search..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-12 py-3 rounded-full border-gray-200 bg-gray-50 focus:bg-white transition-colors"
+            className="pl-12 py-2.5 rounded-full border-0 bg-white/60 backdrop-blur-sm focus:bg-white/80 transition-all shadow-sm text-sm"
           />
         </div>
       </div>
 
       {/* Filter Tabs - Minimal Design */}
       <Tabs defaultValue="all" className="w-full">
-        <div className="flex justify-center mb-12">
-          <TabsList className="bg-gray-50 p-1 rounded-full">
+        <div className="flex justify-center mb-8">
+          <TabsList className="bg-white/50 backdrop-blur-sm p-1 rounded-full shadow-sm">
             <TabsTrigger
               value="all"
-              className="rounded-full px-6 py-2 text-sm font-medium"
+              className="rounded-full px-4 py-1.5 text-sm"
             >
               All
             </TabsTrigger>
             <TabsTrigger
               value="trending"
-              className="rounded-full px-6 py-2 text-sm font-medium"
+              className="rounded-full px-4 py-1.5 text-sm"
             >
               Popular
             </TabsTrigger>
             <TabsTrigger
               value="recent"
-              className="rounded-full px-6 py-2 text-sm font-medium"
+              className="rounded-full px-4 py-1.5 text-sm"
             >
               Recent
             </TabsTrigger>
             <TabsTrigger
               value="writing"
-              className="rounded-full px-6 py-2 text-sm font-medium"
+              className="rounded-full px-4 py-1.5 text-sm"
             >
               Writing
             </TabsTrigger>
             <TabsTrigger
               value="coding"
-              className="rounded-full px-6 py-2 text-sm font-medium"
+              className="rounded-full px-4 py-1.5 text-sm"
             >
               Coding
             </TabsTrigger>
           </TabsList>
         </div>
 
-        {/* Results Count */}
-        <div className="text-center mb-8">
-          <p className="text-sm text-gray-500 font-medium">
-            {getFilteredPrompts("all").length} prompts found
+        {/* Results Count - Subtle */}
+        <div className="text-center mb-6">
+          <p className="text-xs text-gray-400">
+            {getFilteredPrompts("all").length} prompts
           </p>
         </div>
 
