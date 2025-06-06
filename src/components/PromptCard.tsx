@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Copy, Heart, Bookmark, Quote } from "lucide-react";
+import { Copy, Bookmark, Quote } from "lucide-react";
 
 export interface Prompt {
   id: string;
@@ -30,20 +29,22 @@ export default function PromptCard({ prompt, onUse }: PromptCardProps) {
 
   const handleUsePrompt = async () => {
     try {
-      await navigator.clipboard.writeText(prompt.content);
+      const encodedPrompt = encodeURIComponent(prompt.content);
+      const chatGPTUrl = `https://chat.openai.com/?prompt=${encodedPrompt}`;
+      window.open(chatGPTUrl, "_blank");
 
       setIsUsed(true);
       setCurrentUsageCount((prev) => prev + 1);
       onUse?.(prompt.id);
 
-      toast.success("Copied!", {
-        description: "Ready to use in your AI tool",
+      toast.success("Opening in ChatGPT...", {
+        description: "You can edit and send the prompt there",
       });
 
       setTimeout(() => setIsUsed(false), 2000);
     } catch (error) {
-      console.error("Failed to copy:", error);
-      toast.error("Couldn't copy that");
+      console.error("Failed to open ChatGPT:", error);
+      toast.error("Couldn't open ChatGPT");
     }
   };
 

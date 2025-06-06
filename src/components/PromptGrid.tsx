@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PromptCard from "./PromptCard";
 import type { Prompt } from "@/types/prompt";
-import { Search, Filter, Sparkles } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 export default function PromptGrid() {
