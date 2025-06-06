@@ -2,8 +2,8 @@
 
 import PromptGrid from "@/components/PromptGrid";
 import { Heart } from "lucide-react";
-import Image from "next/image"; // For logo icon
 import PassportIcon from "@/components/ui/passportIcon";
+import WorldIDButton from "@/components/WorldIDButton";
 
 export default function HomePage() {
   const isLoggedIn = false; // Replace with actual World ID state
@@ -33,9 +33,7 @@ export default function HomePage() {
                 {userId}
               </span>
             ) : (
-              <button className="text-sm px-4 py-1.5 rounded-md bg-gray-800 text-gray-300 hover:bg-gray-700 transition border border-gray-700">
-                Connect World ID
-              </button>
+              <WorldIDButton />
             )}
           </div>
         </div>
