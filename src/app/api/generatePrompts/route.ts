@@ -6,19 +6,23 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 export async function POST() {
   try {
     const prompt = `
-Generate 10 high-quality, viral-style prompts for AI tools like ChatGPT. 
-Each prompt should be optimized for shareability and usefulness. Follow these rules:
-
-- Each prompt must perform a creative, ambitious, or highly practical task
-- Include the target user persona (e.g. SaaS founder, solo creator, UX designer)
-- Cover diverse use cases (writing, coding, marketing, productivity, education, wellness, etc.)
-- Avoid generic or basic prompts — make them feel like hidden gems
-- Format each as a JSON object with:
-  - content (string) – the prompt itself
-  - tags (array of strings) – categories or topic labels
-  - source: "AI"
-Return the final result as a JSON array of 10 items.
-`;
+    You're a top-tier AI prompt curator for creators, growth hackers, and trend-watchers.
+    
+    Generate 10 *viral-style* prompts for ChatGPT. Follow these rules:
+    
+    - Each prompt must spark creativity, weirdness, or productivity — think "hidden gems" for building, reflecting, or storytelling
+    - Use current internet trends (e.g. vibe coding, AI girlfriends, romanticize your life, therapy-speak, Gen Z slang, side hustles)
+    - Include the *target user persona* (e.g. Gen Z creator, solo founder, indie hacker, UX therapist)
+    - Make them *specific and remixable* — avoid vague or generic ideas
+    - Style them for shareability on TikTok, Twitter, or Threads
+    
+    Format each as a JSON object with:
+      - content (string) – the prompt itself
+      - tags (array of strings) – categories or topic labels
+      - source: "AI"
+    
+    Return a JSON array of 10 objects.
+    `;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
