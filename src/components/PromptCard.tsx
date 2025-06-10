@@ -53,23 +53,6 @@ export default function PromptCard({ prompt, onUse }: PromptCardProps) {
     toast.success(isBookmarked ? "Removed" : "Saved!");
   };
 
-  const getSourceEmoji = (source: string) => {
-    switch (source.toLowerCase()) {
-      case "twitter":
-        return "";
-      case "tiktok":
-        return "";
-      case "github":
-        return "";
-      case "manual":
-        return "";
-      case "community":
-        return "";
-      default:
-        return "";
-    }
-  };
-
   return (
     <div className="group relative break-inside-avoid mb-6">
       {/* Quote-style Card - Dark Theme */}
@@ -91,7 +74,6 @@ export default function PromptCard({ prompt, onUse }: PromptCardProps) {
           {/* Attribution */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2 text-sm text-gray-400">
-              <span className="text-base">{getSourceEmoji(prompt.source)}</span>
               <span className="font-medium text-gray-300">
                 {prompt.creator}
               </span>
