@@ -4,6 +4,7 @@ import PromptGrid from "@/components/PromptGrid";
 import { Heart } from "lucide-react";
 import PassportIcon from "@/components/ui/passportIcon";
 import WorldIDButton from "@/components/WorldIDButton";
+import Link from "next/link";
 
 export default function HomePage() {
   const isLoggedIn = false; // Replace with actual World ID state
@@ -25,6 +26,10 @@ export default function HomePage() {
           <h1 className="text-base font-medium text-gray-300 tracking-wide">
             For you
           </h1>
+
+          {/* <Link href="/tiktok" className="text-white hover:underline">
+            TikTok Prompts →
+          </Link> */}
 
           {/* World ID Status */}
           <div>

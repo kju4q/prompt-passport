@@ -147,7 +147,7 @@ export default function PromptCard({ prompt, onUse }: PromptCardProps) {
               `}
             >
               {isUsed ? (
-                <>✓ Copied</>
+                <>Copied</>
               ) : (
                 <>
                   <Copy className="h-3 w-3 mr-2" />

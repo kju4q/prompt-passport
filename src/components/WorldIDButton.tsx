@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 
 export default function WorldIDButton() {
   const [IDKitWidget, setIDKitWidget] = useState<any>(null);
+  const [VerificationLevel, setVerificationLevel] = useState<any>(null);
   const [error, setError] = useState<string>("");
 
   useEffect(() => {
@@ -17,6 +18,7 @@ export default function WorldIDButton() {
 
         if (idkitModule.IDKitWidget) {
           setIDKitWidget(() => idkitModule.IDKitWidget);
+          setVerificationLevel(idkitModule.VerificationLevel);
           console.log("IDKitWidget component found and set");
         } else {
           setError("IDKitWidget not found in module");
@@ -34,45 +36,46 @@ export default function WorldIDButton() {
     return <div className="text-red-500">Error: {error}</div>;
   }
 
-  if (!IDKitWidget) {
+  if (!IDKitWidget || !VerificationLevel) {
     return <Button disabled>Loading World ID...</Button>;
   }
 
-  const handleVerify = async (proof: any) => {
-    console.log("Verify called with:", proof);
+  async function handleVerify(data: any) {
+    console.log("Verify called with:", data);
     try {
-      const res = await fetch("/api/verify-world-id", {
+      const response = await fetch("/api/verify", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(proof),
-      });
+        body: JSON.stringify(data),
+      }).then((res) => res.json());
 
-      if (!res.ok) {
-        throw new Error("Verification failed.");
+      if (response.code === "success") {
+        console.log("Successfully authenticated with World ID");
+      } else {
+        console.log("Authentication failed with World ID");
+        console.log("error:", response.wldResponse);
       }
 
-      return await res.json();
+      return response;
     } catch (error) {
       console.error("Verification error:", error);
       throw error;
     }
-  };
+  }
 
   const onSuccess = (result: any) => {
-    console.log("✅ Verified with World ID:", result);
+    console.log("Verified with World ID:", result);
   };
 
   return (
     <IDKitWidget
-      app_id="app_13ddcecdf5c93cf7253c545d188b22cd"
-      action="prompt-passport-demo"
-      handleVerify={handleVerify}
+      app_id={`app_${process.env.NEXT_PUBLIC_WLD_APP_ID}`}
+      action={process.env.NEXT_PUBLIC_WC_ACTION || "auth"}
       onSuccess={onSuccess}
-      verification_level="device"
-      // For testing, you can also try:
-      // verification_level="orb"
+      handleVerify={handleVerify}
+      verification_level={VerificationLevel.Device}
     >
       {({ open }: { open: () => void }) => (
         <Button

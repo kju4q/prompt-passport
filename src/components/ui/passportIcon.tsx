@@ -65,9 +65,7 @@ const PassportIcon = ({
           fontSize={dim.fontSize}
           fill="white"
           className="select-none"
-        >
-          ✨
-        </text>
+        ></text>
 
         {/* Gradient Definition */}
         <defs>
@@ -112,9 +110,7 @@ export const CSSPassportIcon = ({
         <div className="absolute -left-0.5 top-1 bottom-1 w-0.5 bg-white/80 rounded-full"></div>
 
         {/* Sparkle */}
-        <div className="absolute inset-0 flex items-center justify-center text-white text-xs">
-          ✨
-        </div>
+        <div className="absolute inset-0 flex items-center justify-center text-white text-xs"></div>
 
         {/* Subtle shine */}
         <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-sm pointer-events-none"></div>

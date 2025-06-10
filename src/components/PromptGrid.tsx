@@ -217,7 +217,7 @@ export default function PromptGrid() {
       {/* Empty State - Dark */}
       {getFilteredPrompts("all").length === 0 && (
         <div className="text-center py-20">
-          <div className="text-6xl mb-6">🔍</div>
+          <div className="text-6xl mb-6"></div>
           <h3 className="text-xl font-light text-gray-300 mb-2">
             No prompts found
           </h3>
