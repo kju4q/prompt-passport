@@ -23,13 +23,17 @@ export default function HomePage() {
           </div>
 
           {/* Center Title */}
-          <h1 className="text-base font-medium text-gray-300 tracking-wide">
-            For you
-          </h1>
-
-          {/* <Link href="/tiktok" className="text-white hover:underline">
-            TikTok Prompts →
-          </Link> */}
+          <div className="flex items-center gap-6">
+            <h1 className="text-base font-medium text-gray-300 tracking-wide">
+              For you
+            </h1>
+            <Link
+              href="/tiktok"
+              className="text-base font-medium text-gray-500 hover:text-gray-300 tracking-wide transition-colors"
+            >
+              TikTok
+            </Link>
+          </div>
 
           {/* World ID Status */}
           <div>
