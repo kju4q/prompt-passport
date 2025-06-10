@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
-export default function WorldIDButton() {
+interface WorldIDButtonProps {
+  onVerified?: (nullifierHash: string) => void;
+}
+
+export default function WorldIDButton({ onVerified }: WorldIDButtonProps = {}) {
   const [IDKitWidget, setIDKitWidget] = useState<any>(null);
   const [VerificationLevel, setVerificationLevel] = useState<any>(null);
   const [error, setError] = useState<string>("");
@@ -67,6 +71,9 @@ export default function WorldIDButton() {
 
   const onSuccess = (result: any) => {
     console.log("Verified with World ID:", result);
+    if (onVerified && result.nullifier_hash) {
+      onVerified(result.nullifier_hash);
+    }
   };
 
   return (
