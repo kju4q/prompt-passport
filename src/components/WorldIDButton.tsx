@@ -76,6 +76,9 @@ export default function WorldIDButton() {
       onSuccess={onSuccess}
       handleVerify={handleVerify}
       verification_level={VerificationLevel.Device}
+      enableTelemetry={true}
+      theme="dark"
+      autoClose={true}
     >
       {({ open }: { open: () => void }) => (
         <Button
