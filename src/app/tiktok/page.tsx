@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import PromptCard from "@/components/PromptCard";
 import { Prompt } from "@/types/prompt";
 import { Heart } from "lucide-react";
@@ -33,6 +34,21 @@ const tiktokPrompts: Prompt[] = [
 export default function TikTokPage() {
   const isLoggedIn = false; // Replace with actual World ID state
   const userId = "anon389"; // Replace with actual user info
+  const [loading, setLoading] = useState(true);
+  const [prompts, setPrompts] = useState<Prompt[]>([]);
+
+  useEffect(() => {
+    // Simulate loading delay like the AI generation
+    const loadPrompts = async () => {
+      setLoading(true);
+      // Simulate loading time (1.5 seconds)
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      setPrompts(tiktokPrompts);
+      setLoading(false);
+    };
+
+    loadPrompts();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-900">
@@ -58,7 +74,7 @@ export default function TikTokPage() {
               For you
             </Link>
             <h1 className="text-base font-medium text-gray-300 tracking-wide">
-              TikTok Prompts
+              TikTok
             </h1>
           </div>
 
@@ -77,11 +93,25 @@ export default function TikTokPage() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-16">
-        <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6">
-          {tiktokPrompts.map((prompt) => (
-            <PromptCard key={prompt.id} prompt={prompt} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <div key={i} className="break-inside-avoid mb-6">
+                <div className="bg-gray-800/50 rounded-2xl p-6 animate-pulse border border-gray-700/50">
+                  <div className="h-4 bg-gray-700 rounded mb-4 w-1/3"></div>
+                  <div className="h-32 bg-gray-700 rounded mb-4"></div>
+                  <div className="h-6 bg-gray-700 rounded w-20"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6">
+            {prompts.map((prompt) => (
+              <PromptCard key={prompt.id} prompt={prompt} />
+            ))}
+          </div>
+        )}
       </main>
 
       {/* Footer - Dark */}
