@@ -36,7 +36,7 @@ export async function POST() {
     const content = completion.choices[0].message.content;
 
     if (content) {
-      const jsonString = content.match(/\[.*\]/s)?.[0];
+      const jsonString = content.match(/\[[\s\S]*\]/)?.[0];
       if (!jsonString) throw new Error("No JSON array found in the response.");
 
       const json = JSON.parse(jsonString);
