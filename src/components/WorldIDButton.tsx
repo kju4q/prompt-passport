@@ -72,7 +72,7 @@ export default function WorldIDButton() {
   return (
     <IDKitWidget
       app_id={`app_${process.env.NEXT_PUBLIC_WLD_APP_ID}`}
-      action={process.env.NEXT_PUBLIC_WC_ACTION || "auth"}
+      action={process.env.NEXT_PUBLIC_WC_ACTION || "prompt-passport"}
       onSuccess={onSuccess}
       handleVerify={handleVerify}
       verification_level={VerificationLevel.Device}
