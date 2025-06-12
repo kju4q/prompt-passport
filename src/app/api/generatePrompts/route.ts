@@ -46,7 +46,7 @@ export async function POST() {
         tags: p.tags,
         source: "AI",
         usage_count: Math.floor(Math.random() * 100),
-        creator: "Promptpin AI",
+        creator: "AI",
         created_at: new Date().toISOString(),
       }));
 

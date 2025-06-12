@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
+import { VerificationProvider } from "@/contexts/VerificationContext";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -28,17 +29,19 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
-        <Toaster
-          position="bottom-right"
-          toastOptions={{
-            style: {
-              background: "white",
-              border: "1px solid #e5e7eb",
-              color: "#374151",
-            },
-          }}
-        />
+        <VerificationProvider>
+          {children}
+          <Toaster
+            position="bottom-right"
+            toastOptions={{
+              style: {
+                background: "white",
+                border: "1px solid #e5e7eb",
+                color: "#374151",
+              },
+            }}
+          />
+        </VerificationProvider>
       </body>
     </html>
   );

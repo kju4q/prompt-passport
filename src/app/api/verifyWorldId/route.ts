@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         app_id: process.env.WORLDCOIN_APP_ID,
-        action: "promptpin_demo",
+        action: "prompt-passport",
         signal: "", // Optional, you can leave blank for now
         proof: body.proof,
         nullifier_hash: body.nullifier_hash,
