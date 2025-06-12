@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import WorldIDButton from "@/components/WorldIDButton";
@@ -9,6 +9,13 @@ import { useVerification } from "@/contexts/VerificationContext";
 export default function LandingPage() {
   const router = useRouter();
   const { isVerified, setVerification } = useVerification();
+
+  // Redirect to feed if already verified
+  useEffect(() => {
+    if (isVerified) {
+      router.push("/feed");
+    }
+  }, [isVerified, router]);
 
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center">
@@ -21,19 +28,17 @@ export default function LandingPage() {
             to access the prompt feed and create your own prompts.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-            {!isVerified && (
-              <WorldIDButton
-                onVerified={(nullifierHash: string) => {
-                  console.log(
-                    "Verification successful, nullifier hash:",
-                    nullifierHash
-                  );
-                  setVerification(nullifierHash);
-                  console.log("Redirecting to /feed...");
-                  router.push("/feed");
-                }}
-              />
-            )}
+            <WorldIDButton
+              onVerified={(nullifierHash: string) => {
+                console.log(
+                  "Verification successful, nullifier hash:",
+                  nullifierHash
+                );
+                setVerification(nullifierHash);
+                console.log("Redirecting to /feed...");
+                router.push("/feed");
+              }}
+            />
             <Button
               variant="outline"
               className="bg-transparent border-gray-700 text-gray-300 hover:bg-gray-800"

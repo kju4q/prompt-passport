@@ -11,17 +11,7 @@ import { useVerification } from "@/contexts/VerificationContext";
 
 export default function HomePage() {
   const router = useRouter();
-  const { isVerified } = useVerification();
-
-  useEffect(() => {
-    if (!isVerified) {
-      router.push("/");
-    }
-  }, [isVerified, router]);
-
-  if (!isVerified) {
-    return null; // Don't render anything while redirecting
-  }
+  const { isVerified, nullifierHash } = useVerification();
 
   return (
     <div className="min-h-screen bg-gray-900">
@@ -53,7 +43,15 @@ export default function HomePage() {
 
           {/* World ID Status */}
           <div>
-            <span className="text-sm text-green-400 font-medium">Verified</span>
+            {isVerified ? (
+              <span className="text-sm text-green-400 font-medium">
+                Verified
+              </span>
+            ) : (
+              <span className="text-sm text-gray-400 font-medium">
+                Guest Mode
+              </span>
+            )}
           </div>
         </div>
       </header>

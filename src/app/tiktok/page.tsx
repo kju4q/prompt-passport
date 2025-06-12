@@ -5,8 +5,8 @@ import PromptCard from "@/components/PromptCard";
 import { Prompt } from "@/types/prompt";
 import { Heart } from "lucide-react";
 import PassportIcon from "@/components/ui/passportIcon";
-import WorldIDButton from "@/components/WorldIDButton";
 import Link from "next/link";
+import { useVerification } from "@/contexts/VerificationContext";
 
 const tiktokPrompts: Prompt[] = [
   {
@@ -32,8 +32,7 @@ const tiktokPrompts: Prompt[] = [
 ];
 
 export default function TikTokPage() {
-  const isLoggedIn = false; // Replace with actual World ID state
-  const userId = "anon389"; // Replace with actual user info
+  const { isVerified } = useVerification();
   const [loading, setLoading] = useState(true);
   const [prompts, setPrompts] = useState<Prompt[]>([]);
 
@@ -80,12 +79,14 @@ export default function TikTokPage() {
 
           {/* World ID Status */}
           <div>
-            {isLoggedIn ? (
+            {isVerified ? (
               <span className="text-sm text-green-400 font-medium">
-                {userId}
+                Verified
               </span>
             ) : (
-              <WorldIDButton />
+              <span className="text-sm text-gray-400 font-medium">
+                Guest Mode
+              </span>
             )}
           </div>
         </div>
