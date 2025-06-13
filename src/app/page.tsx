@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import WorldIDButton from "@/components/WorldIDButton";
@@ -9,13 +8,6 @@ import { useVerification } from "@/contexts/VerificationContext";
 export default function LandingPage() {
   const router = useRouter();
   const { isVerified, setVerification } = useVerification();
-
-  // Redirect to feed if already verified
-  useEffect(() => {
-    if (isVerified) {
-      router.push("/feed");
-    }
-  }, [isVerified, router]);
 
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center">
@@ -35,8 +27,8 @@ export default function LandingPage() {
                   nullifierHash
                 );
                 setVerification(nullifierHash);
-                console.log("Redirecting to /feed...");
-                router.push("/feed");
+                console.log("Redirecting to /form/create...");
+                router.push("/form/create");
               }}
             />
             <Button

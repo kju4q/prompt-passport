@@ -1,37 +1,35 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import PromptGrid from "@/components/PromptGrid";
-import { Heart } from "lucide-react";
-import PassportIcon from "@/components/ui/passportIcon";
-import WorldIDButton from "@/components/WorldIDButton";
 import Link from "next/link";
 import { useVerification } from "@/contexts/VerificationContext";
+import PassportIcon from "@/components/ui/passportIcon";
 import Navigation from "@/components/Navigation";
-import type { Prompt } from "@/types/prompt";
 
-export default function HomePage() {
-  const router = useRouter();
-  const { isVerified, nullifierHash } = useVerification();
-  const [prompts, setPrompts] = useState<Prompt[]>([]);
+export default function CommunityPage() {
+  const { isVerified } = useVerification();
   const [loading, setLoading] = useState(true);
+  const [prompts, setPrompts] = useState([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPrompts = async () => {
-      setLoading(true);
       try {
-        const res = await fetch("/api/generatePrompts", { method: "POST" });
-        if (!res.ok) throw new Error("Failed to fetch prompts");
-        const data = await res.json();
+        const response = await fetch("/api/prompts/community");
+        if (!response.ok) {
+          throw new Error("Failed to fetch community prompts");
+        }
+        const data = await response.json();
         setPrompts(data.prompts);
       } catch (err) {
-        setError("Failed to load prompts");
+        console.error("Error fetching community prompts:", err);
+        setError("Failed to load community prompts");
       } finally {
         setLoading(false);
       }
     };
+
     fetchPrompts();
   }, []);
 
@@ -76,37 +74,16 @@ export default function HomePage() {
           </div>
         ) : loading ? (
           <div className="text-center text-gray-400">
-            <p>Loading prompts...</p>
+            <p>Loading community prompts...</p>
+          </div>
+        ) : prompts.length === 0 ? (
+          <div className="text-center text-gray-400">
+            <p>No community prompts yet. Be the first to submit one!</p>
           </div>
         ) : (
           <PromptGrid prompts={prompts} />
         )}
       </main>
-
-      {/* Footer - Dark */}
-      <footer className="bg-gray-900/60 backdrop-blur-sm border-t border-gray-800 mt-24">
-        <div className="max-w-7xl mx-auto px-6 py-16">
-          <div className="text-center space-y-6">
-            <div className="flex justify-center items-center gap-2 text-gray-500">
-              <span className="font-light">Made with</span>
-              <Heart className="h-4 w-4 text-red-400 fill-red-400" />
-              <span className="font-light">for creators everywhere</span>
-            </div>
-
-            <div className="flex justify-center gap-8 text-sm text-gray-500 font-light">
-              <button className="hover:text-gray-300 transition-colors cursor-pointer">
-                About
-              </button>
-              <button className="hover:text-gray-300 transition-colors cursor-pointer">
-                Privacy
-              </button>
-              <button className="hover:text-gray-300 transition-colors cursor-pointer">
-                Support
-              </button>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

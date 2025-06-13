@@ -13,6 +13,7 @@ interface VerificationContextType {
   nullifierHash: string | null;
   setVerification: (nullifierHash: string) => void;
   clearVerification: () => void;
+  loading: boolean;
 }
 
 const VerificationContext = createContext<VerificationContextType | undefined>(
@@ -22,6 +23,7 @@ const VerificationContext = createContext<VerificationContextType | undefined>(
 export function VerificationProvider({ children }: { children: ReactNode }) {
   const [isVerified, setIsVerified] = useState(false);
   const [nullifierHash, setNullifierHash] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // Load verification status from localStorage on mount
   useEffect(() => {
@@ -32,6 +34,7 @@ export function VerificationProvider({ children }: { children: ReactNode }) {
       setIsVerified(true);
       setNullifierHash(storedNullifierHash);
     }
+    setLoading(false);
   }, []);
 
   const setVerification = (hash: string) => {
@@ -55,6 +58,7 @@ export function VerificationProvider({ children }: { children: ReactNode }) {
         nullifierHash,
         setVerification,
         clearVerification,
+        loading,
       }}
     >
       {children}

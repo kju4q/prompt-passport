@@ -1,15 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PromptCard from "./PromptCard";
 import type { Prompt } from "@/types/prompt";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
-export default function PromptGrid() {
-  const [prompts, setPrompts] = useState<Prompt[]>([]);
-  const [loading, setLoading] = useState(false);
+interface PromptGridProps {
+  prompts: Prompt[];
+}
+
+export default function PromptGrid({
+  prompts: initialPrompts,
+}: PromptGridProps) {
+  const [prompts, setPrompts] = useState<Prompt[]>(initialPrompts);
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleUsePrompt = async (promptId: string) => {
@@ -22,27 +27,6 @@ export default function PromptGrid() {
     );
     console.log(`Prompt ${promptId} used - will update in database`);
   };
-
-  useEffect(() => {
-    const fetchPrompts = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch("/api/generatePrompts", {
-          method: "POST", // or "GET", depending on how your API is written
-        });
-
-        if (!res.ok) throw new Error("Failed to fetch prompts");
-        const data = await res.json();
-        setPrompts(data.prompts); // assuming your API returns { prompts: [...] }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPrompts();
-  }, []);
 
   const getFilteredPrompts = (category: string) => {
     let filtered = prompts;
@@ -76,22 +60,6 @@ export default function PromptGrid() {
       )
     );
   };
-
-  if (loading) {
-    return (
-      <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
-        {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-          <div key={i} className="break-inside-avoid mb-6">
-            <div className="bg-gray-800/50 rounded-2xl p-6 animate-pulse border border-gray-700/50">
-              <div className="h-4 bg-gray-700 rounded mb-4 w-1/3"></div>
-              <div className="h-32 bg-gray-700 rounded mb-4"></div>
-              <div className="h-6 bg-gray-700 rounded w-20"></div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-12">

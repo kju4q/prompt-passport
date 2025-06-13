@@ -7,6 +7,7 @@ import { Heart } from "lucide-react";
 import PassportIcon from "@/components/ui/passportIcon";
 import Link from "next/link";
 import { useVerification } from "@/contexts/VerificationContext";
+import Navigation from "@/components/Navigation";
 
 const tiktokPrompts: Prompt[] = [
   {
@@ -64,18 +65,8 @@ export default function TikTokPage() {
             </Link>
           </div>
 
-          {/* Center Title */}
-          <div className="flex items-center gap-6">
-            <Link
-              href="/"
-              className="text-base font-medium text-gray-500 hover:text-gray-300 tracking-wide transition-colors"
-            >
-              For you
-            </Link>
-            <h1 className="text-base font-medium text-gray-300 tracking-wide">
-              TikTok
-            </h1>
-          </div>
+          {/* Navigation */}
+          <Navigation />
 
           {/* World ID Status */}
           <div>

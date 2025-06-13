@@ -13,6 +13,7 @@ export interface Prompt {
   usage_count: number;
   tags: string[];
   created_at: string;
+  text?: string;
 }
 
 interface PromptCardProps {
@@ -58,16 +59,16 @@ export default function PromptCard({ prompt, onUse }: PromptCardProps) {
       {/* Quote-style Card - Dark Theme */}
       <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 hover:border-gray-600/50 transition-all duration-300 hover:bg-gray-800/70 relative overflow-hidden">
         {/* Quote Icon */}
-        <div className="absolute top-4 left-4 opacity-20">
+        {/* <div className="absolute top-4 left-4 opacity-20">
           <Quote className="h-8 w-8 text-gray-400" />
-        </div>
+        </div> */}
 
         {/* Content */}
         <div className="relative z-10 pl-8">
           {/* Prompt Content - Quote Style */}
           <div className="mb-6">
             <p className="text-gray-200 leading-relaxed text-base font-normal italic">
-              "{prompt.content}"
+              "{prompt.text || prompt.content}"
             </p>
           </div>
 
@@ -128,14 +129,7 @@ export default function PromptCard({ prompt, onUse }: PromptCardProps) {
                 }
               `}
             >
-              {isUsed ? (
-                <>Copied</>
-              ) : (
-                <>
-                  <Copy className="h-3 w-3 mr-2" />
-                  Use This
-                </>
-              )}
+              {isUsed ? <>Copied</> : <>Use This</>}
             </Button>
           </div>
         </div>
