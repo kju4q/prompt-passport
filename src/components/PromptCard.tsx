@@ -30,13 +30,22 @@ export default function PromptCard({ prompt, onUse }: PromptCardProps) {
 
   const handleUsePrompt = async () => {
     try {
-      const encodedPrompt = encodeURIComponent(prompt.content);
+      const encodedPrompt = encodeURIComponent(prompt.text || prompt.content);
       const chatGPTUrl = `https://chat.openai.com/?prompt=${encodedPrompt}`;
       window.open(chatGPTUrl, "_blank");
 
       setIsUsed(true);
       setCurrentUsageCount((prev) => prev + 1);
       onUse?.(prompt.id);
+
+      // Increment usage count in the database if prompt has a numeric id (Supabase)
+      if (prompt.id && !isNaN(Number(prompt.id))) {
+        fetch("/api/prompts/increment-usage", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: Number(prompt.id) }),
+        });
+      }
 
       toast.success("Opening in ChatGPT...", {
         description: "You can edit and send the prompt there",
