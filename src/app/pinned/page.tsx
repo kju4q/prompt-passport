@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import PromptGrid from "@/components/PromptGrid";
 import Link from "next/link";
 import { useVerification } from "@/contexts/VerificationContext";
@@ -8,31 +8,32 @@ import PassportIcon from "@/components/ui/passportIcon";
 import Navigation from "@/components/Navigation";
 import { Pin } from "lucide-react";
 
-export default function CommunityPage() {
-  const { isVerified } = useVerification();
+export default function PinnedPage() {
+  const { isVerified, nullifierHash } = useVerification();
   const [loading, setLoading] = useState(true);
   const [prompts, setPrompts] = useState([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchPrompts = async () => {
+    const fetchPinnedPrompts = async () => {
+      if (!nullifierHash) return;
+      setLoading(true);
       try {
-        const response = await fetch("/api/prompts/community");
-        if (!response.ok) {
-          throw new Error("Failed to fetch community prompts");
-        }
-        const data = await response.json();
-        setPrompts(data.prompts);
+        const res = await fetch("/api/prompts/pinned", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nullifier_hash: nullifierHash }),
+        });
+        const data = await res.json();
+        setPrompts(data.prompts || []);
       } catch (err) {
-        console.error("Error fetching community prompts:", err);
-        setError("Failed to load community prompts");
+        setError("Failed to load pinned prompts");
       } finally {
         setLoading(false);
       }
     };
-
-    fetchPrompts();
-  }, []);
+    fetchPinnedPrompts();
+  }, [nullifierHash]);
 
   return (
     <div className="min-h-screen bg-gray-900">
@@ -53,11 +54,16 @@ export default function CommunityPage() {
           <Navigation />
 
           {/* World ID Status and Pinned Link */}
-          <div>
+          <div className="flex items-center gap-3">
             {isVerified ? (
-              <span className="text-sm text-green-400 font-medium">
-                Verified
-              </span>
+              <>
+                {/* <Link href="/pinned" title="View pinned prompts">
+                  <Pin className="h-5 w-5 text-blue-400 hover:text-blue-500 transition-colors" />
+                </Link> */}
+                <span className="text-sm text-green-400 font-medium">
+                  Verified
+                </span>
+              </>
             ) : (
               <span className="text-sm text-gray-400 font-medium">
                 Guest Mode
@@ -75,11 +81,11 @@ export default function CommunityPage() {
           </div>
         ) : loading ? (
           <div className="text-center text-gray-400">
-            <p>Loading community prompts...</p>
+            <p>Loading pinned prompts...</p>
           </div>
         ) : prompts.length === 0 ? (
           <div className="text-center text-gray-400">
-            <p>No community prompts yet. Be the first to submit one!</p>
+            <p>No pinned prompts yet.</p>
           </div>
         ) : (
           <PromptGrid prompts={prompts} />

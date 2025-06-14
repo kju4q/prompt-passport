@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Copy, Bookmark, Quote } from "lucide-react";
+import { Copy, Bookmark, Quote, Pin } from "lucide-react";
+import { useVerification } from "@/contexts/VerificationContext";
 
 export interface Prompt {
   id: string;
@@ -19,14 +20,24 @@ export interface Prompt {
 interface PromptCardProps {
   prompt: Prompt;
   onUse?: (promptId: string) => void;
+  isPinned?: boolean;
 }
 
-export default function PromptCard({ prompt, onUse }: PromptCardProps) {
+export default function PromptCard({
+  prompt,
+  onUse,
+  isPinned,
+}: PromptCardProps) {
   const [isUsed, setIsUsed] = useState(false);
   const [currentUsageCount, setCurrentUsageCount] = useState(
     prompt.usage_count
   );
-  const [isBookmarked, setIsBookmarked] = useState(false);
+  const { nullifierHash } = useVerification();
+  const [isBookmarked, setIsBookmarked] = useState(isPinned || false);
+
+  useEffect(() => {
+    setIsBookmarked(isPinned || false);
+  }, [isPinned]);
 
   const handleUsePrompt = async () => {
     try {
@@ -58,9 +69,19 @@ export default function PromptCard({ prompt, onUse }: PromptCardProps) {
     }
   };
 
-  const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
-    toast.success(isBookmarked ? "Removed" : "Saved!");
+  const handlePin = async () => {
+    if (!nullifierHash || !prompt.id) return;
+    const pin = !isBookmarked;
+    setIsBookmarked(pin);
+    await fetch("/api/prompts/pin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        prompt_id: prompt.id,
+        nullifier_hash: nullifierHash,
+        pin,
+      }),
+    });
   };
 
   return (
@@ -90,19 +111,6 @@ export default function PromptCard({ prompt, onUse }: PromptCardProps) {
               <span>•</span>
               <span>{prompt.source}</span>
             </div>
-
-            <button
-              onClick={handleBookmark}
-              className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-1 hover:bg-gray-700/50 rounded-full"
-            >
-              <Bookmark
-                className={`h-4 w-4 transition-colors ${
-                  isBookmarked
-                    ? "fill-blue-400 text-blue-400"
-                    : "text-gray-500 hover:text-blue-400"
-                }`}
-              />
-            </button>
           </div>
 
           {/* Tags */}
@@ -125,21 +133,43 @@ export default function PromptCard({ prompt, onUse }: PromptCardProps) {
               {currentUsageCount} uses
             </div>
 
-            <Button
-              onClick={handleUsePrompt}
-              disabled={isUsed}
-              size="sm"
-              className={`
-                rounded-full font-medium text-sm px-6 transition-all duration-300
-                ${
-                  isUsed
-                    ? "bg-green-600/20 text-green-400 hover:bg-green-600/20 shadow-none border border-green-600/30"
-                    : "bg-white hover:bg-gray-100 text-gray-900 hover:shadow-lg hover:scale-105"
-                }
-              `}
-            >
-              {isUsed ? <>Copied</> : <>Use This</>}
-            </Button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handlePin}
+                className="transition-opacity duration-300 p-1 hover:bg-gray-700/50 rounded-full relative cursor-pointer peer"
+                aria-label={isBookmarked ? "Unpin" : "Pin"}
+                type="button"
+              >
+                <Pin
+                  className={`h-4 w-4 transition-colors ${
+                    isBookmarked
+                      ? "fill-blue-400 text-blue-400"
+                      : "text-gray-500 hover:text-blue-400"
+                  }`}
+                  fill={isBookmarked ? "currentColor" : "none"}
+                />
+                {/* Tooltip */}
+                <span className="absolute left-1/2 -translate-x-1/2 -top-8 px-3 py-1 rounded bg-gray-900 text-xs text-white shadow-lg opacity-0 pointer-events-none peer-hover:opacity-100 transition-opacity z-20 whitespace-nowrap flex flex-col items-center">
+                  {isBookmarked ? "Unpin" : "Pin"}
+                  <span className="w-2 h-2 bg-gray-900 rotate-45 mt-[-4px]"></span>
+                </span>
+              </button>
+              <Button
+                onClick={handleUsePrompt}
+                disabled={isUsed}
+                size="sm"
+                className={`
+                  rounded-full font-medium text-sm px-6 transition-all duration-300
+                  ${
+                    isUsed
+                      ? "bg-green-600/20 text-green-400 hover:bg-green-600/20 shadow-none border border-green-600/30"
+                      : "bg-white hover:bg-gray-100 text-gray-900 hover:shadow-lg hover:scale-105"
+                  }
+                `}
+              >
+                {isUsed ? <>Copied</> : <>Use This</>}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
