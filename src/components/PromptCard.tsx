@@ -250,11 +250,13 @@ export default function PromptCard({
                 {/* NEW: Clean Evolve button */}
                 <Button
                   size="sm"
-                  variant="outline"
                   onClick={() => setShowEvolutionSheet(true)}
-                  className="border-emerald-500/40 hover:bg-emerald-500/10 text-emerald-400 h-8 px-3 text-xs"
+                  className="group rounded-full font-medium text-sm px-2 py-1 border transition-all duration-300 cursor-pointer bg-transparent border-gray-600 text-gray-200 hover:bg-gray-800/40 hover:border-blue-400 hover:text-blue-400 flex items-center gap-1 overflow-hidden"
                 >
-                  🧬 Evolve
+                  <span className="text-lg">🧬</span>
+                  <span className="max-w-0 group-hover:max-w-xs transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap pl-1">
+                    Evolve
+                  </span>
                 </Button>
 
                 {/* Use button - unchanged */}
