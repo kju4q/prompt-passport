@@ -15,8 +15,10 @@ export async function POST() {
     - Include the *target user persona* (e.g. Gen Z creator, solo founder, indie hacker, UX therapist)
     - Make them *specific and remixable* — avoid vague or generic ideas
     - Style them for shareability on TikTok, Twitter, or Threads
+    - For each prompt, generate a 'title' field: a 5-word hook that summarizes the prompt and grabs attention (do not repeat the prompt text)
     
     Format each as a JSON object with:
+      - title (string) – a 5-word hook for the prompt
       - content (string) – the prompt itself
       - tags (array of strings) – categories or topic labels
       - source: "AI"
@@ -42,6 +44,7 @@ export async function POST() {
       const json = JSON.parse(jsonString);
       const enriched = json.map((p: any, index: number) => ({
         id: `${Date.now()}-${index}`,
+        title: p.title,
         content: p.content,
         tags: p.tags,
         source: "AI",
