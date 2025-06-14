@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { Copy, Bookmark, Quote, Pin, X } from "lucide-react";
 import { useVerification } from "@/contexts/VerificationContext";
@@ -44,12 +43,8 @@ export default function PromptCard({
   const { nullifierHash } = useVerification();
   const [isBookmarked, setIsBookmarked] = useState(isPinned || false);
 
-  // Evolution bottom sheet states
+  // Evolution bottom sheet state
   const [showEvolutionSheet, setShowEvolutionSheet] = useState(false);
-  const [selectedRemixType, setSelectedRemixType] = useState<string>("");
-  const [isRemixing, setIsRemixing] = useState(false);
-  const [remixProgress, setRemixProgress] = useState(0);
-  const [remixResult, setRemixResult] = useState("");
 
   useEffect(() => {
     setIsBookmarked(isPinned || false);
@@ -100,50 +95,16 @@ export default function PromptCard({
   };
 
   const handleRemix = async (remixType: string) => {
-    setIsRemixing(true);
-    setRemixProgress(0);
-    setSelectedRemixType(remixType);
+    // Close the bottom sheet immediately
+    setShowEvolutionSheet(false);
 
-    const progressInterval = setInterval(() => {
-      setRemixProgress((prev) => {
-        if (prev >= 90) {
-          clearInterval(progressInterval);
-          return 90;
-        }
-        return prev + 15;
-      });
-    }, 300);
-
-    try {
-      const response = await fetch("/api/remix", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          originalPrompt: prompt.text || prompt.content,
-          remixType: remixType,
-          parentId: prompt.id,
-        }),
-      });
-
-      const result = await response.json();
-      setRemixResult(result.remixedPrompt);
-      setRemixProgress(100);
-
-      toast.success("Evolution complete!");
-    } catch (error) {
-      console.error("Remix failed:", error);
-      toast.error("Evolution failed");
-    } finally {
-      setIsRemixing(false);
-      clearInterval(progressInterval);
-    }
+    // Redirect to the detail page with the remix type as a query parameter
+    const detailUrl = `/prompt/${prompt.id}?evolve=${remixType}`;
+    window.location.href = detailUrl;
   };
 
   const closeEvolutionSheet = () => {
     setShowEvolutionSheet(false);
-    setRemixResult("");
-    setRemixProgress(0);
-    setIsRemixing(false);
   };
 
   return (
@@ -247,7 +208,7 @@ export default function PromptCard({
               </div>
 
               <div className="flex items-center gap-2">
-                {/* NEW: Clean Evolve button */}
+                {/* Clean Evolve button */}
                 <Button
                   size="sm"
                   onClick={() => setShowEvolutionSheet(true)}
@@ -282,7 +243,7 @@ export default function PromptCard({
         </div>
       </div>
 
-      {/* Evolution Bottom Sheet */}
+      {/* Evolution Bottom Sheet - Simplified for redirection */}
       {showEvolutionSheet && (
         <>
           {/* Backdrop */}
@@ -323,98 +284,51 @@ export default function PromptCard({
                 </div>
               </div>
 
-              {/* Evolution options */}
-              {!isRemixing && !remixResult && (
-                <div className="space-y-3 mb-6">
-                  <label className="text-sm text-gray-400 block mb-3">
-                    Choose Evolution Style
-                  </label>
+              {/* Evolution options - redirect to detail page */}
+              <div className="space-y-3 mb-6">
+                <label className="text-sm text-gray-400 block mb-3">
+                  Choose Evolution Style
+                </label>
 
-                  <Button
-                    onClick={() => handleRemix("creative")}
-                    className="w-full justify-start h-12 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/40 hover:from-purple-500/30 hover:to-pink-500/30 text-purple-400"
-                  >
-                    <span className="text-lg mr-3">✨</span>
-                    <div className="text-left">
-                      <div className="font-medium">Creative Evolution</div>
-                      <div className="text-xs opacity-70">
-                        Make it artistic and imaginative
-                      </div>
+                <Button
+                  onClick={() => handleRemix("creative")}
+                  className="w-full justify-start h-12 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/40 hover:from-purple-500/30 hover:to-pink-500/30 text-purple-400"
+                >
+                  <span className="text-lg mr-3">✨</span>
+                  <div className="text-left">
+                    <div className="font-medium">Creative Evolution</div>
+                    <div className="text-xs opacity-70">
+                      Make it artistic and imaginative
                     </div>
-                  </Button>
+                  </div>
+                </Button>
 
-                  <Button
-                    onClick={() => handleRemix("professional")}
-                    className="w-full justify-start h-12 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/40 hover:from-blue-500/30 hover:to-cyan-500/30 text-blue-400"
-                  >
-                    <span className="text-lg mr-3">💼</span>
-                    <div className="text-left">
-                      <div className="font-medium">Professional Evolution</div>
-                      <div className="text-xs opacity-70">
-                        Make it business-ready and formal
-                      </div>
+                <Button
+                  onClick={() => handleRemix("professional")}
+                  className="w-full justify-start h-12 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/40 hover:from-blue-500/30 hover:to-cyan-500/30 text-blue-400"
+                >
+                  <span className="text-lg mr-3">💼</span>
+                  <div className="text-left">
+                    <div className="font-medium">Professional Evolution</div>
+                    <div className="text-xs opacity-70">
+                      Make it business-ready and formal
                     </div>
-                  </Button>
+                  </div>
+                </Button>
 
-                  <Button
-                    onClick={() => handleRemix("detailed")}
-                    className="w-full justify-start h-12 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/40 hover:from-emerald-500/30 hover:to-teal-500/30 text-emerald-400"
-                  >
-                    <span className="text-lg mr-3">🔍</span>
-                    <div className="text-left">
-                      <div className="font-medium">Detailed Evolution</div>
-                      <div className="text-xs opacity-70">
-                        Add specifics and context
-                      </div>
+                <Button
+                  onClick={() => handleRemix("detailed")}
+                  className="w-full justify-start h-12 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/40 hover:from-emerald-500/30 hover:to-teal-500/30 text-emerald-400"
+                >
+                  <span className="text-lg mr-3">🔍</span>
+                  <div className="text-left">
+                    <div className="font-medium">Detailed Evolution</div>
+                    <div className="text-xs opacity-70">
+                      Add specifics and context
                     </div>
-                  </Button>
-                </div>
-              )}
-
-              {/* Progress */}
-              {isRemixing && (
-                <div className="mb-6">
-                  <div className="flex items-center justify-between text-sm mb-3">
-                    <span className="text-emerald-400">Evolving prompt...</span>
-                    <span className="text-emerald-400">{remixProgress}%</span>
                   </div>
-                  <Progress value={remixProgress} className="h-3" />
-                </div>
-              )}
-
-              {/* Result */}
-              {remixResult && (
-                <div className="mb-6">
-                  <label className="text-sm text-blue-400 block mb-2">
-                    Evolved Prompt
-                  </label>
-                  <div className="p-4 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-lg border border-blue-500/30 text-sm text-gray-200">
-                    {remixResult}
-                  </div>
-
-                  <div className="flex gap-3 mt-4">
-                    <Button
-                      onClick={() => {
-                        toast.success("Evolution saved!");
-                        closeEvolutionSheet();
-                      }}
-                      className="flex-1 bg-gradient-to-r from-emerald-500 to-blue-500"
-                    >
-                      Save Evolution
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setRemixResult("");
-                        setRemixProgress(0);
-                      }}
-                      className="border-emerald-500/50"
-                    >
-                      Try Again
-                    </Button>
-                  </div>
-                </div>
-              )}
+                </Button>
+              </div>
             </div>
           </div>
         </>
