@@ -54,11 +54,14 @@ export default function PromptGrid({
     if (searchQuery) {
       filtered = filtered.filter(
         (p) =>
-          p.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.tags.some((tag: string) =>
-            tag.toLowerCase().includes(searchQuery.toLowerCase())
-          ) ||
-          p.creator.toLowerCase().includes(searchQuery.toLowerCase())
+          (p.content &&
+            p.content.toLowerCase().includes(searchQuery.toLowerCase())) ||
+          (Array.isArray(p.tags) &&
+            p.tags.some((tag: string) =>
+              tag.toLowerCase().includes(searchQuery.toLowerCase())
+            )) ||
+          (p.creator &&
+            p.creator.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     }
 
@@ -73,10 +76,12 @@ export default function PromptGrid({
           (a, b) =>
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
-    return filtered.filter((p) =>
-      p.tags.some((tag: string) =>
-        tag.toLowerCase().includes(category.toLowerCase())
-      )
+    return filtered.filter(
+      (p) =>
+        Array.isArray(p.tags) &&
+        p.tags.some((tag: string) =>
+          tag.toLowerCase().includes(category.toLowerCase())
+        )
     );
   };
 

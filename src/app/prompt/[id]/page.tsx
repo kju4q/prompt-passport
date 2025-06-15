@@ -12,6 +12,8 @@ import { useVerification } from "@/contexts/VerificationContext";
 import PassportIcon from "@/components/ui/passportIcon";
 import Navigation from "@/components/Navigation";
 import { use } from "react";
+import { TreePine, Copy, Heart, Zap } from "lucide-react";
+import EvolutionTree from "@/components/EvolutionTree";
 
 export default function PromptDetailPage({
   params,
@@ -25,6 +27,9 @@ export default function PromptDetailPage({
   const router = useRouter();
   const searchParams = useSearchParams();
   const evolveType = searchParams.get("evolve");
+  const [viewMode, setViewMode] = useState("tree");
+  const [selectedNode, setSelectedNode] = useState(null);
+  const [treeData, setTreeData] = useState([]);
 
   // Evolution states
   const [isEvolving, setIsEvolving] = useState(false);
@@ -107,6 +112,27 @@ export default function PromptDetailPage({
       setEvolutionResult(result.remixedPrompt);
       setEvolutionProgress(100);
 
+      // Immediately save the evolution to the database
+      const saveResponse = await fetch("/api/prompts/save-evolution", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: result.remixedPrompt,
+          parentId: prompt.id,
+          remixType: remixType,
+          generation: (prompt.generation || 0) + 1,
+        }),
+      });
+      if (saveResponse.ok) {
+        toast.success("Evolution saved to community!");
+        setEvolutionResult("");
+        setEvolutionProgress(0);
+        // Remove evolve param from URL
+        router.replace(`/prompt/${promptId}`);
+        // Reload tree
+        loadEvolutionTree(prompt);
+      }
+
       toast.success("Evolution complete!");
 
       // Reload evolution tree to show new evolution
@@ -119,36 +145,6 @@ export default function PromptDetailPage({
     } finally {
       setIsEvolving(false);
       clearInterval(progressInterval);
-    }
-  };
-
-  const saveEvolution = async () => {
-    if (!evolutionResult) return;
-
-    try {
-      const response = await fetch("/api/prompts/save-evolution", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content: evolutionResult,
-          parentId: prompt.id,
-          remixType: evolveType,
-          generation: (prompt.generation || 0) + 1,
-        }),
-      });
-
-      if (response.ok) {
-        toast.success("Evolution saved to community!");
-        // Clear evolution state and reload tree
-        setEvolutionResult("");
-        setEvolutionProgress(0);
-        // Remove evolve param from URL
-        router.replace(`/prompt/${promptId}`);
-        // Reload tree
-        loadEvolutionTree(prompt);
-      }
-    } catch (error) {
-      toast.error("Failed to save evolution");
     }
   };
 
@@ -248,12 +244,6 @@ export default function PromptDetailPage({
 
                 <div className="flex gap-3">
                   <Button
-                    onClick={saveEvolution}
-                    className="bg-gradient-to-r from-emerald-500 to-blue-500"
-                  >
-                    💾 Save to Community
-                  </Button>
-                  <Button
                     variant="outline"
                     onClick={() => {
                       setEvolutionResult("");
@@ -267,62 +257,31 @@ export default function PromptDetailPage({
                 </div>
               </div>
             )}
-
-            {/* Evolution Tree */}
-            {evolutionTree.length > 0 && (
-              <div className="bg-gray-800/30 rounded-2xl p-6 border border-gray-700/50">
-                <h3 className="text-lg font-semibold text-purple-400 mb-6">
-                  🌳 Evolution Tree
-                </h3>
-
-                <div className="space-y-4">
-                  {evolutionTree.map((evolution, index) => (
-                    <div key={evolution.id} className="flex items-start gap-4">
-                      <div className="flex flex-col items-center">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center text-white text-sm font-bold">
-                          {index + 1}
-                        </div>
-                        {index < evolutionTree.length - 1 && (
-                          <div className="w-0.5 h-16 bg-gradient-to-b from-emerald-500/50 to-blue-500/50 mt-2" />
-                        )}
-                      </div>
-
-                      <div className="flex-1">
-                        <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/30">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Badge
-                              variant="outline"
-                              className="border-blue-500/40 text-blue-400 text-xs"
-                            >
-                              Gen {evolution.generation}
-                            </Badge>
-                            <Badge
-                              variant="outline"
-                              className="border-purple-500/40 text-purple-400 text-xs"
-                            >
-                              {evolution.remix_type}
-                            </Badge>
-                          </div>
-
-                          <p className="text-gray-200 text-sm italic">
-                            "{evolution.content}"
-                          </p>
-
-                          <div className="flex items-center gap-4 mt-3 text-xs text-gray-400">
-                            <span>by @{evolution.creator}</span>
-                            <span>👍 {evolution.likes || 0}</span>
-                            <span>⚡ {evolution.usage_count || 0} uses</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         ) : null}
       </main>
+
+      {/* Evolution Tree - full width, outside main */}
+      {(evolutionTree.length > 0 || evolutionResult) && (
+        <div className="w-full max-w-full px-0 overflow-x-auto">
+          <EvolutionTree
+            prompt={prompt}
+            evolutionTree={evolutionTree}
+            evolutionResult={evolutionResult}
+            evolveType={evolveType}
+            onTryAgain={() => {
+              setEvolutionResult("");
+              setEvolutionProgress(0);
+              router.replace(`/prompt/${promptId}`);
+            }}
+            onSaveEvolution={() => {}}
+            promptId={promptId}
+            router={router}
+            setEvolutionResult={setEvolutionResult}
+            setEvolutionProgress={setEvolutionProgress}
+          />
+        </div>
+      )}
     </div>
   );
 }

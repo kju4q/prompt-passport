@@ -11,11 +11,15 @@ export async function POST(req: Request) {
       );
     }
 
+    // Generate a unique string ID for the evolution prompt
+    const newPromptId = `${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
     const { data, error } = await supabase
       .from("prompts")
       .insert([
         {
-          content,
+          id: newPromptId,
+          text: content,
           parent_id: parentId,
           remix_type: remixType,
           generation,

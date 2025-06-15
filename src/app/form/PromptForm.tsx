@@ -28,8 +28,12 @@ export default function PromptForm() {
       .map((tag) => tag.trim())
       .filter((tag) => tag !== "");
 
+    // Generate a unique string ID for the prompt
+    const newPromptId = `${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
     const { error } = await supabase.from("prompts").insert([
       {
+        id: newPromptId,
         text,
         model_tag: modelTag,
         source_tag: sourceTag,

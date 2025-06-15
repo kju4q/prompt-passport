@@ -19,10 +19,9 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
     if (!evolutions || evolutions.length === 0) {
-      return NextResponse.json(
-        { error: "No evolutions found" },
-        { status: 404 }
-      );
+      return NextResponse.json({
+        tree: evolutions || [],
+      });
     }
     return NextResponse.json({ tree: evolutions });
   } catch (err) {
