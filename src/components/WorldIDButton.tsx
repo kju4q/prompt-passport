@@ -79,6 +79,7 @@ export default function WorldIDButton({ onVerified }: WorldIDButtonProps = {}) {
 
   const handleWorldAppVerify = async () => {
     try {
+      // @ts-ignore - MiniKit types are not up to date with the actual implementation
       const result = await MiniKit.requestVerification({
         app_id: `app_${process.env.NEXT_PUBLIC_WLD_APP_ID}`,
         action: process.env.NEXT_PUBLIC_WC_ACTION || "prompt-passport",
@@ -91,6 +92,7 @@ export default function WorldIDButton({ onVerified }: WorldIDButtonProps = {}) {
     }
   };
 
+  // @ts-ignore - MiniKit types are not up to date with the actual implementation
   const isWorldApp = MiniKit.isInstalled?.();
 
   return isWorldApp ? (
