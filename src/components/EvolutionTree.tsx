@@ -34,6 +34,7 @@ export default function EvolutionTree({
   const [viewMode, setViewMode] = useState("tree");
   const [selectedNode, setSelectedNode] = useState(null);
   const [treeData, setTreeData] = useState<any[]>([]);
+  const [commits, setCommits] = useState<any[]>([]);
 
   // Build tree structure with real parent-child relationships
   // Update this function in your components/EvolutionTree.tsx
@@ -96,14 +97,13 @@ export default function EvolutionTree({
         title: `${evolveType} Evolution`,
         creator: "You",
         generation: (prompt.generation || 0) + 1,
-        remix_type: evolveType,
+        remix_type: evolveType || "",
         likes: 0,
         usage_count: 0,
         created_at: new Date().toISOString(),
         parent_id: prompt.id,
         children: [],
         level: 1,
-        isPending: true,
       };
       // Do NOT add pendingNode to nodesMap or tree until saved
     }
@@ -280,7 +280,6 @@ export default function EvolutionTree({
       parentY?: any;
     }) => {
       const isSelected = selectedNode === node.id;
-      const isPending = node.isPending;
 
       const x = parentX + Math.cos(angle) * distance;
       const y = parentY + Math.sin(angle) * distance;
@@ -311,20 +310,15 @@ export default function EvolutionTree({
               y2="8"
               stroke="#6b7280"
               strokeWidth="1"
-              strokeDasharray={isPending ? "4,4" : "none"}
+              strokeDasharray="4,4"
               opacity="0.6"
-              className={isPending ? "animate-pulse" : ""}
+              className="animate-pulse"
             />
           </svg>
 
           <div
             className={`
             relative bg-gray-800/60 backdrop-blur-sm rounded-lg p-3 border transition-all duration-300 w-64 sm:w-72
-            ${
-              isPending
-                ? "border-gray-500/60 animate-pulse"
-                : "border-gray-700/50"
-            }
             ${
               isSelected
                 ? "ring-2 ring-gray-500 scale-105"
@@ -335,9 +329,7 @@ export default function EvolutionTree({
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <div className="text-base">
-                  {isPending
-                    ? "⚡"
-                    : node.remix_type === "creative"
+                  {node.remix_type === "creative"
                     ? "🎨"
                     : node.remix_type === "professional"
                     ? "💼"
@@ -349,7 +341,7 @@ export default function EvolutionTree({
                   variant="outline"
                   className="border-gray-500 text-gray-400 text-xs"
                 >
-                  {isPending ? "Evolving" : `Gen ${node.generation}`}
+                  Gen {node.generation}
                 </Badge>
               </div>
 
@@ -394,26 +386,6 @@ export default function EvolutionTree({
                 </Button>
               </div>
             </div>
-
-            {isPending && (
-              <div className="mt-3 pt-3 border-t border-gray-700 flex gap-2">
-                <Button
-                  size="sm"
-                  onClick={onSaveEvolution}
-                  className="bg-gray-700 hover:bg-gray-600 text-white border border-gray-600 text-xs h-7"
-                >
-                  💾 Save
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={onTryAgain}
-                  className="border-gray-600 text-gray-400 hover:bg-gray-800 text-xs h-7"
-                >
-                  🔄 Retry
-                </Button>
-              </div>
-            )}
           </div>
 
           {node.children &&
@@ -507,7 +479,7 @@ export default function EvolutionTree({
 
   // Lab View Component
   const LabView = () => {
-    const [commits, setCommits] = useState([]);
+    const [commits, setCommits] = useState<any[]>([]);
 
     useEffect(() => {
       const buildTimeline = () => {
@@ -550,16 +522,16 @@ export default function EvolutionTree({
             creator: "You",
             timestamp: new Date().toISOString(),
             generation: (prompt.generation || 0) + 1,
-            remix_type: evolveType,
+            remix_type: evolveType || "",
             likes: 0,
             usage_count: 0,
             event: "evolving",
-            isPending: true,
           });
         }
 
         return timelineEvents.sort(
-          (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
+          (a, b) =>
+            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
         );
       };
 

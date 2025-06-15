@@ -18,7 +18,7 @@ import EvolutionTree from "@/components/EvolutionTree";
 export default function PromptDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const { isVerified } = useVerification();
   const [prompt, setPrompt] = useState<any>(null);
@@ -38,7 +38,7 @@ export default function PromptDetailPage({
   const [evolutionTree, setEvolutionTree] = useState<any[]>([]);
 
   // Unwrap params using React.use with proper type casting
-  const unwrappedParams = use(params as unknown as Promise<{ id: string }>);
+  const unwrappedParams = use(params);
   const promptId = unwrappedParams.id;
 
   useEffect(() => {

@@ -19,10 +19,9 @@ export async function POST(req: Request) {
       // Pin: insert if not exists
       const { error } = await supabase
         .from("pinned")
-        .upsert(
-          { prompt_id, nullifier_hash },
-          { onConflict: ["prompt_id", "nullifier_hash"] }
-        );
+        .upsert([{ prompt_id, nullifier_hash }], {
+          onConflict: "prompt_id,nullifier_hash",
+        });
       if (error)
         return NextResponse.json({ error: error.message }, { status: 500 });
       return NextResponse.json({ success: true });
