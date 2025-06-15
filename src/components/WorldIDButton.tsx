@@ -12,6 +12,7 @@ export default function WorldIDButton({ onVerified }: WorldIDButtonProps = {}) {
   const [IDKitWidget, setIDKitWidget] = useState<any>(null);
   const [VerificationLevel, setVerificationLevel] = useState<any>(null);
   const [error, setError] = useState<string>("");
+  const [debugInfo, setDebugInfo] = useState<string>("");
 
   useEffect(() => {
     const loadIDKit = async () => {
@@ -79,48 +80,61 @@ export default function WorldIDButton({ onVerified }: WorldIDButtonProps = {}) {
 
   const handleWorldAppVerify = async () => {
     try {
+      setDebugInfo("Starting verification...");
       // @ts-ignore - MiniKit types are not up to date with the actual implementation
       const result = await MiniKit.requestVerification({
         app_id: `app_${process.env.NEXT_PUBLIC_WLD_APP_ID}`,
         action: process.env.NEXT_PUBLIC_WC_ACTION || "prompt-passport",
       });
+      setDebugInfo("Verification successful!");
       if (onVerified && result.nullifier_hash) {
         onVerified(result.nullifier_hash);
       }
     } catch (error) {
+      setDebugInfo(
+        `Error: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
       console.error("World App verification error:", error);
     }
   };
 
   // @ts-ignore - MiniKit types are not up to date with the actual implementation
   const isWorldApp = MiniKit.isInstalled?.();
+  console.log("Is World App detected?", isWorldApp);
 
-  return isWorldApp ? (
-    <Button
-      className="bg-white text-black hover:bg-gray-100 transition-all font-semibold"
-      onClick={handleWorldAppVerify}
-    >
-      Verify with World ID
-    </Button>
-  ) : (
-    <IDKitWidget
-      app_id={`app_${process.env.NEXT_PUBLIC_WLD_APP_ID}`}
-      action={process.env.NEXT_PUBLIC_WC_ACTION || "prompt-passport"}
-      onSuccess={onSuccess}
-      handleVerify={handleVerify}
-      verification_level={VerificationLevel.Device}
-      enableTelemetry={true}
-      theme="dark"
-      autoClose={true}
-    >
-      {({ open }: { open: () => void }) => (
+  return (
+    <div className="space-y-2">
+      {debugInfo && (
+        <div className="text-sm text-gray-500 mb-2">{debugInfo}</div>
+      )}
+      {isWorldApp ? (
         <Button
           className="bg-white text-black hover:bg-gray-100 transition-all font-semibold"
-          onClick={open}
+          onClick={handleWorldAppVerify}
         >
           Verify with World ID
         </Button>
+      ) : (
+        <IDKitWidget
+          app_id={`app_${process.env.NEXT_PUBLIC_WLD_APP_ID}`}
+          action={process.env.NEXT_PUBLIC_WC_ACTION || "prompt-passport"}
+          onSuccess={onSuccess}
+          handleVerify={handleVerify}
+          verification_level={VerificationLevel.Device}
+          enableTelemetry={true}
+          theme="dark"
+          autoClose={true}
+        >
+          {({ open }: { open: () => void }) => (
+            <Button
+              className="bg-white text-black hover:bg-gray-100 transition-all font-semibold"
+              onClick={open}
+            >
+              Verify with World ID
+            </Button>
+          )}
+        </IDKitWidget>
       )}
-    </IDKitWidget>
+    </div>
   );
 }
