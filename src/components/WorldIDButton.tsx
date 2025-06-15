@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { MiniKit } from "@worldcoin/minikit-js";
 
 interface WorldIDButtonProps {
   onVerified?: (nullifierHash: string) => void;
@@ -76,7 +77,30 @@ export default function WorldIDButton({ onVerified }: WorldIDButtonProps = {}) {
     }
   };
 
-  return (
+  const handleWorldAppVerify = async () => {
+    try {
+      const result = await MiniKit.requestVerification({
+        app_id: `app_${process.env.NEXT_PUBLIC_WLD_APP_ID}`,
+        action: process.env.NEXT_PUBLIC_WC_ACTION || "prompt-passport",
+      });
+      if (onVerified && result.nullifier_hash) {
+        onVerified(result.nullifier_hash);
+      }
+    } catch (error) {
+      console.error("World App verification error:", error);
+    }
+  };
+
+  const isWorldApp = MiniKit.isInstalled?.();
+
+  return isWorldApp ? (
+    <Button
+      className="bg-white text-black hover:bg-gray-100 transition-all font-semibold"
+      onClick={handleWorldAppVerify}
+    >
+      Verify with World ID
+    </Button>
+  ) : (
     <IDKitWidget
       app_id={`app_${process.env.NEXT_PUBLIC_WLD_APP_ID}`}
       action={process.env.NEXT_PUBLIC_WC_ACTION || "prompt-passport"}
