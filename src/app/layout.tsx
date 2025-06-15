@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { VerificationProvider } from "@/contexts/VerificationContext";
 import "./globals.css";
+import { MiniKitProvider } from "@worldcoin/minikit-js/minikit-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,23 +27,25 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <VerificationProvider>
-          {children}
-          <Toaster
-            position="bottom-right"
-            toastOptions={{
-              style: {
-                background: "white",
-                border: "1px solid #e5e7eb",
-                color: "#374151",
-              },
-            }}
-          />
-        </VerificationProvider>
-      </body>
+      <MiniKitProvider>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          <VerificationProvider>
+            {children}
+            <Toaster
+              position="bottom-right"
+              toastOptions={{
+                style: {
+                  background: "white",
+                  border: "1px solid #e5e7eb",
+                  color: "#374151",
+                },
+              }}
+            />
+          </VerificationProvider>
+        </body>
+      </MiniKitProvider>
     </html>
   );
 }
