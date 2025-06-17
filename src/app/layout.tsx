@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import { VerificationProvider } from "@/contexts/VerificationContext";
 import "./globals.css";
 import { MiniKitProvider } from "@worldcoin/minikit-js/minikit-provider";
+import { ErudaProvider } from "@/contexts/Eruda/ErudaContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +33,7 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <VerificationProvider>
-            {children}
+            <ErudaProvider>{children}</ErudaProvider>
             <Toaster
               position="bottom-right"
               toastOptions={{
