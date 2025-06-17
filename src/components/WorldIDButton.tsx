@@ -13,37 +13,97 @@ export default function WorldIDButton({ onVerified }: WorldIDButtonProps = {}) {
   const [VerificationLevel, setVerificationLevel] = useState<any>(null);
   const [error, setError] = useState<string>("");
   const [debugInfo, setDebugInfo] = useState<string>("");
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    const loadIDKit = async () => {
-      try {
-        console.log("Loading @worldcoin/idkit...");
-        const idkitModule = await import("@worldcoin/idkit");
-        console.log("IDKit module loaded:", idkitModule);
-        console.log("Available exports:", Object.keys(idkitModule));
+    const checkEnvironment = () => {
+      if (typeof window === "undefined") {
+        setDebugInfo("Window is undefined - running on server");
+        return false;
+      }
 
-        if (idkitModule.IDKitWidget) {
+      const isSecureContext = window.isSecureContext;
+      const hasCrypto = !!window.crypto;
+      const hasSubtle = !!(window.crypto && window.crypto.subtle);
+      const protocol = window.location.protocol;
+      const hostname = window.location.hostname;
+
+      const debugMessage = [
+        `Secure Context: ${isSecureContext}`,
+        `Has Crypto: ${hasCrypto}`,
+        `Has Subtle: ${hasSubtle}`,
+        `Protocol: ${protocol}`,
+        `Hostname: ${hostname}`,
+        `User Agent: ${navigator.userAgent}`,
+      ].join("\n");
+
+      setDebugInfo(debugMessage);
+      console.log("Environment check:", debugMessage);
+
+      // Allow on localhost regardless of protocol
+      if (hostname === "localhost" || hostname === "127.0.0.1") {
+        return true;
+      }
+
+      // For other environments, require secure context
+      return isSecureContext && hasCrypto && hasSubtle;
+    };
+
+    const initialize = async () => {
+      try {
+        if (!checkEnvironment()) {
+          throw new Error(
+            "Environment check failed. Check debug info for details."
+          );
+        }
+
+        // Try to load the module
+        const idkitModule = await import("@worldcoin/idkit");
+        console.log("IDKit module loaded successfully");
+
+        if (idkitModule.IDKitWidget && idkitModule.VerificationLevel) {
           setIDKitWidget(() => idkitModule.IDKitWidget);
           setVerificationLevel(idkitModule.VerificationLevel);
-          console.log("IDKitWidget component found and set");
+          setIsInitialized(true);
         } else {
-          setError("IDKitWidget not found in module");
+          throw new Error("Required IDKit components not found");
         }
       } catch (err) {
-        console.error("Failed to load IDKit:", err);
-        setError(err?.toString() || "Failed to load IDKit");
+        console.error("Initialization error:", err);
+        setError(err?.toString() || "Failed to initialize");
+        setDebugInfo(
+          (prev) => `${prev}\n\nInitialization error: ${err?.toString()}`
+        );
       }
     };
 
-    loadIDKit();
+    initialize();
   }, []);
 
   if (error) {
-    return <div className="text-red-500">Error: {error}</div>;
+    return (
+      <div className="space-y-2">
+        <div className="text-red-500">Error: {error}</div>
+        {debugInfo && (
+          <div className="text-sm text-gray-500 whitespace-pre-line">
+            {debugInfo}
+          </div>
+        )}
+      </div>
+    );
   }
 
-  if (!IDKitWidget || !VerificationLevel) {
-    return <Button disabled>Loading World ID...</Button>;
+  if (!isInitialized || !IDKitWidget || !VerificationLevel) {
+    return (
+      <div className="space-y-2">
+        <Button disabled>Loading World ID...</Button>
+        {debugInfo && (
+          <div className="text-sm text-gray-500 whitespace-pre-line">
+            {debugInfo}
+          </div>
+        )}
+      </div>
+    );
   }
 
   async function handleVerify(data: any) {
@@ -81,26 +141,43 @@ export default function WorldIDButton({ onVerified }: WorldIDButtonProps = {}) {
   const handleWorldAppVerify = async () => {
     try {
       setDebugInfo("Starting verification...");
+      console.log("World App verification started with:", {
+        app_id: `app_${process.env.NEXT_PUBLIC_WLD_APP_ID}`,
+        action: process.env.NEXT_PUBLIC_WC_ACTION || "prompt-passport",
+      });
+
       // @ts-ignore - MiniKit types are not up to date with the actual implementation
       const result = await MiniKit.requestVerification({
         app_id: `app_${process.env.NEXT_PUBLIC_WLD_APP_ID}`,
         action: process.env.NEXT_PUBLIC_WC_ACTION || "prompt-passport",
       });
+
+      console.log("World App verification result:", result);
       setDebugInfo("Verification successful!");
+
       if (onVerified && result.nullifier_hash) {
         onVerified(result.nullifier_hash);
       }
     } catch (error) {
-      setDebugInfo(
-        `Error: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-      console.error("World App verification error:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      console.error("World App verification error:", {
+        error,
+        message: errorMessage,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      setDebugInfo(`Error: ${errorMessage}`);
     }
   };
 
   // @ts-ignore - MiniKit types are not up to date with the actual implementation
   const isWorldApp = MiniKit.isInstalled?.();
-  console.log("Is World App detected?", isWorldApp);
+  console.log("World App detection:", {
+    isInstalled: isWorldApp,
+    environment: process.env.NODE_ENV,
+    appId: process.env.NEXT_PUBLIC_WLD_APP_ID,
+    action: process.env.NEXT_PUBLIC_WC_ACTION,
+  });
 
   return (
     <div className="space-y-2">
