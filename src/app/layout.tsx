@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Toaster } from "sonner";
-import { VerificationProvider } from "@/contexts/VerificationContext";
 import "./globals.css";
 import { MiniKitProvider } from "@worldcoin/minikit-js/minikit-provider";
 import { ErudaProvider } from "@/contexts/Eruda/ErudaContext";

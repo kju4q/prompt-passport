@@ -3,47 +3,109 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MiniKit } from "@worldcoin/minikit-js";
+import dynamic from "next/dynamic";
 
 interface WorldIDButtonProps {
   onVerified?: (nullifierHash: string) => void;
 }
 
-export default function WorldIDButton({ onVerified }: WorldIDButtonProps = {}) {
+// Create a client-only version of the component
+const WorldIDButtonClient = ({ onVerified }: WorldIDButtonProps) => {
   const [IDKitWidget, setIDKitWidget] = useState<any>(null);
   const [VerificationLevel, setVerificationLevel] = useState<any>(null);
   const [error, setError] = useState<string>("");
   const [debugInfo, setDebugInfo] = useState<string>("");
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    const loadIDKit = async () => {
-      try {
-        console.log("Loading @worldcoin/idkit...");
-        const idkitModule = await import("@worldcoin/idkit");
-        console.log("IDKit module loaded:", idkitModule);
-        console.log("Available exports:", Object.keys(idkitModule));
+    const checkEnvironment = () => {
+      if (typeof window === "undefined") {
+        setDebugInfo("Window is undefined - running on server");
+        return false;
+      }
 
-        if (idkitModule.IDKitWidget) {
+      const isSecureContext = window.isSecureContext;
+      const hasCrypto = !!window.crypto;
+      const hasSubtle = !!(window.crypto && window.crypto.subtle);
+      const protocol = window.location.protocol;
+      const hostname = window.location.hostname;
+
+      const debugMessage = [
+        `Secure Context: ${isSecureContext}`,
+        `Has Crypto: ${hasCrypto}`,
+        `Has Subtle: ${hasSubtle}`,
+        `Protocol: ${protocol}`,
+        `Hostname: ${hostname}`,
+        `User Agent: ${navigator.userAgent}`,
+      ].join("\n");
+
+      setDebugInfo(debugMessage);
+      console.log("Environment check:", debugMessage);
+
+      // Allow on localhost regardless of protocol
+      if (hostname === "localhost" || hostname === "127.0.0.1") {
+        return true;
+      }
+
+      // For other environments, require secure context
+      return isSecureContext && hasCrypto && hasSubtle;
+    };
+
+    const initialize = async () => {
+      try {
+        if (!checkEnvironment()) {
+          throw new Error(
+            "Environment check failed. Check debug info for details."
+          );
+        }
+
+        // Try to load the module
+        const idkitModule = await import("@worldcoin/idkit");
+        console.log("IDKit module loaded successfully");
+
+        if (idkitModule.IDKitWidget && idkitModule.VerificationLevel) {
           setIDKitWidget(() => idkitModule.IDKitWidget);
           setVerificationLevel(idkitModule.VerificationLevel);
-          console.log("IDKitWidget component found and set");
+          setIsInitialized(true);
         } else {
-          setError("IDKitWidget not found in module");
+          throw new Error("Required IDKit components not found");
         }
       } catch (err) {
-        console.error("Failed to load IDKit:", err);
-        setError(err?.toString() || "Failed to load IDKit");
+        console.error("Initialization error:", err);
+        setError(err?.toString() || "Failed to initialize");
+        setDebugInfo(
+          (prev) => `${prev}\n\nInitialization error: ${err?.toString()}`
+        );
       }
     };
 
-    loadIDKit();
+    initialize();
   }, []);
 
   if (error) {
-    return <div className="text-red-500">Error: {error}</div>;
+    return (
+      <div className="space-y-2">
+        <div className="text-red-500">Error: {error}</div>
+        {debugInfo && (
+          <div className="text-sm text-gray-500 whitespace-pre-line">
+            {debugInfo}
+          </div>
+        )}
+      </div>
+    );
   }
 
-  if (!IDKitWidget || !VerificationLevel) {
-    return <Button disabled>Loading World ID...</Button>;
+  if (!isInitialized || !IDKitWidget || !VerificationLevel) {
+    return (
+      <div className="space-y-2">
+        <Button disabled>Loading World ID...</Button>
+        {debugInfo && (
+          <div className="text-sm text-gray-500 whitespace-pre-line">
+            {debugInfo}
+          </div>
+        )}
+      </div>
+    );
   }
 
   async function handleVerify(data: any) {
@@ -137,4 +199,9 @@ export default function WorldIDButton({ onVerified }: WorldIDButtonProps = {}) {
       )}
     </div>
   );
-}
+};
+
+// Export a client-only version of the component
+export default dynamic(() => Promise.resolve(WorldIDButtonClient), {
+  ssr: false,
+});
