@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Toaster } from "sonner";
-import { VerificationProvider } from "@/contexts/VerificationContext";
 import "./globals.css";
-import { MiniKitProvider } from "@worldcoin/minikit-js/minikit-provider";
-import { Eruda } from "@/components/Eruda";
+import { Providers } from "@/components/Providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,27 +25,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <MiniKitProvider>
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          <Eruda>
-            <VerificationProvider>
-              {children}
-              <Toaster
-                position="bottom-right"
-                toastOptions={{
-                  style: {
-                    background: "white",
-                    border: "1px solid #e5e7eb",
-                    color: "#374151",
-                  },
-                }}
-              />
-            </VerificationProvider>
-          </Eruda>
-        </body>
-      </MiniKitProvider>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

@@ -3,12 +3,14 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MiniKit } from "@worldcoin/minikit-js";
+import dynamic from "next/dynamic";
 
 interface WorldIDButtonProps {
   onVerified?: (nullifierHash: string) => void;
 }
 
-export default function WorldIDButton({ onVerified }: WorldIDButtonProps = {}) {
+// Create a client-only version of the component
+const WorldIDButtonClient = ({ onVerified }: WorldIDButtonProps) => {
   const [IDKitWidget, setIDKitWidget] = useState<any>(null);
   const [VerificationLevel, setVerificationLevel] = useState<any>(null);
   const [error, setError] = useState<string>("");
@@ -141,43 +143,26 @@ export default function WorldIDButton({ onVerified }: WorldIDButtonProps = {}) {
   const handleWorldAppVerify = async () => {
     try {
       setDebugInfo("Starting verification...");
-      console.log("World App verification started with:", {
-        app_id: `app_${process.env.NEXT_PUBLIC_WLD_APP_ID}`,
-        action: process.env.NEXT_PUBLIC_WC_ACTION || "prompt-passport",
-      });
-
       // @ts-ignore - MiniKit types are not up to date with the actual implementation
       const result = await MiniKit.requestVerification({
         app_id: `app_${process.env.NEXT_PUBLIC_WLD_APP_ID}`,
         action: process.env.NEXT_PUBLIC_WC_ACTION || "prompt-passport",
       });
-
-      console.log("World App verification result:", result);
       setDebugInfo("Verification successful!");
-
       if (onVerified && result.nullifier_hash) {
         onVerified(result.nullifier_hash);
       }
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
-      console.error("World App verification error:", {
-        error,
-        message: errorMessage,
-        stack: error instanceof Error ? error.stack : undefined,
-      });
-      setDebugInfo(`Error: ${errorMessage}`);
+      setDebugInfo(
+        `Error: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
+      console.error("World App verification error:", error);
     }
   };
 
   // @ts-ignore - MiniKit types are not up to date with the actual implementation
   const isWorldApp = MiniKit.isInstalled?.();
-  console.log("World App detection:", {
-    isInstalled: isWorldApp,
-    environment: process.env.NODE_ENV,
-    appId: process.env.NEXT_PUBLIC_WLD_APP_ID,
-    action: process.env.NEXT_PUBLIC_WC_ACTION,
-  });
+  console.log("Is World App detected?", isWorldApp);
 
   return (
     <div className="space-y-2">
@@ -214,4 +199,9 @@ export default function WorldIDButton({ onVerified }: WorldIDButtonProps = {}) {
       )}
     </div>
   );
-}
+};
+
+// Export a client-only version of the component
+export default dynamic(() => Promise.resolve(WorldIDButtonClient), {
+  ssr: false,
+});
