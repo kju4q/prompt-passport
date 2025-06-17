@@ -76,6 +76,9 @@ devDependencies:
   '@types/react-dom':
     specifier: ^18.3.5
     version: 18.3.7(@types/react@18.3.23)
+  eruda:
+    specifier: ^3.4.3
+    version: 3.4.3
   supabase:
     specifier: ^2.24.3
     version: 2.24.3
@@ -2309,6 +2312,10 @@ packages:
     dependencies:
       is-arrayish: 0.2.1
     dev: false
+
+  /eruda@3.4.3:
+    resolution: {integrity: sha512-J2TsF4dXSspOXev5bJ6mljv0dRrxj21wklrDzbvPmYaEmVoC+2psylyRi70nUPFh1mTQfIBsSusUtAMZtUN+/w==}
+    dev: true
 
   /es-define-property@1.0.1:
     resolution: {integrity: sha512-e3nRfgfUZ4rNGL232gUgX06QNyyez04KdjFrF+LTRoOXmrOgFKDg4BCdsjW8EnT69eqdYGmRpJwiPVYNrCaW3g==}
