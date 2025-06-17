@@ -169,34 +169,25 @@ const WorldIDButtonClient = ({ onVerified }: WorldIDButtonProps) => {
       {debugInfo && (
         <div className="text-sm text-gray-500 mb-2">{debugInfo}</div>
       )}
-      {isWorldApp ? (
-        <Button
-          className="bg-white text-black hover:bg-gray-100 transition-all font-semibold"
-          onClick={handleWorldAppVerify}
-        >
-          Verify with World ID
-        </Button>
-      ) : (
-        <IDKitWidget
-          app_id={`app_${process.env.NEXT_PUBLIC_WLD_APP_ID}`}
-          action={process.env.NEXT_PUBLIC_WC_ACTION || "prompt-passport"}
-          onSuccess={onSuccess}
-          handleVerify={handleVerify}
-          verification_level={VerificationLevel.Device}
-          enableTelemetry={true}
-          theme="dark"
-          autoClose={true}
-        >
-          {({ open }: { open: () => void }) => (
-            <Button
-              className="bg-white text-black hover:bg-gray-100 transition-all font-semibold"
-              onClick={open}
-            >
-              Verify with World ID
-            </Button>
-          )}
-        </IDKitWidget>
-      )}
+      <IDKitWidget
+        app_id={`app_${process.env.NEXT_PUBLIC_WLD_APP_ID}`}
+        action={process.env.NEXT_PUBLIC_WC_ACTION || "prompt-passport"}
+        onSuccess={onSuccess}
+        handleVerify={handleVerify}
+        verification_level={VerificationLevel.Device}
+        enableTelemetry={true}
+        theme="dark"
+        autoClose={true}
+      >
+        {({ open }: { open: () => void }) => (
+          <Button
+            className="bg-white text-black hover:bg-gray-100 transition-all font-semibold"
+            onClick={open}
+          >
+            Verify with World ID
+          </Button>
+        )}
+      </IDKitWidget>
     </div>
   );
 };
