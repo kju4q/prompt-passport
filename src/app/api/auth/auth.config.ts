@@ -12,7 +12,14 @@ export const authOptions: NextAuthConfig = {
         nonce: { label: "Nonce", type: "text" },
       },
       async authorize(credentials: any) {
+        console.log(
+          "Auth attempt with credentials:",
+          !!credentials?.payload,
+          !!credentials?.nonce
+        );
+
         if (!credentials?.payload || !credentials?.nonce) {
+          console.log("Missing credentials");
           return null;
         }
 
@@ -20,9 +27,17 @@ export const authOptions: NextAuthConfig = {
           const payload = JSON.parse(credentials.payload);
           const nonce = credentials.nonce as string;
 
-          // For now, let's skip the World ID verification to test the basic flow
-          // We'll add it back once the basic auth is working
-          if (payload.address) {
+          console.log("Verifying SIWE message for address:", payload.address);
+
+          // Import verifySiweMessage dynamically to avoid Edge Runtime issues
+          const { verifySiweMessage } = await import("@worldcoin/minikit-js");
+          const validMessage = await verifySiweMessage(payload, nonce);
+
+          console.log("SIWE verification result:", validMessage.isValid);
+
+          if (validMessage.isValid) {
+            console.log("Creating/updating user in database");
+
             // Create or update user in Supabase
             const { data: existingUser, error: fetchError } = await supabase
               .from("users")
@@ -37,6 +52,7 @@ export const authOptions: NextAuthConfig = {
 
             let user;
             if (!existingUser) {
+              console.log("Creating new user");
               // Create new user
               const { data: newUser, error: createError } = await supabase
                 .from("users")
@@ -56,6 +72,7 @@ export const authOptions: NextAuthConfig = {
               }
               user = newUser;
             } else {
+              console.log("Updating existing user");
               // Update existing user's last login
               const { data: updatedUser, error: updateError } = await supabase
                 .from("users")
@@ -71,12 +88,14 @@ export const authOptions: NextAuthConfig = {
               user = updatedUser;
             }
 
+            console.log("Auth successful, returning user:", user.id);
             return {
               id: user.id,
               address: payload.address,
               wallet_address: payload.address,
             };
           }
+          console.log("SIWE verification failed");
           return null;
         } catch (error) {
           console.error("Auth error:", error);
