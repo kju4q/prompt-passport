@@ -14,7 +14,8 @@ export async function POST(req: NextRequest) {
   const { payload, nonce } = (await req.json()) as IRequestPayload;
 
   // Verify the nonce matches what we stored
-  const storedNonce = cookies().get("siwe")?.value;
+  const cookieStore = await cookies();
+  const storedNonce = cookieStore.get("siwe")?.value;
   if (nonce !== storedNonce) {
     return NextResponse.json({
       status: "error",
@@ -29,7 +30,8 @@ export async function POST(req: NextRequest) {
 
     if (validMessage.isValid) {
       // Clear the nonce cookie after successful verification
-      cookies().delete("siwe");
+      const cookieStore = await cookies();
+      cookieStore.delete("siwe");
 
       return NextResponse.json({
         status: "success",

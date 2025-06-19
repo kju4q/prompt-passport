@@ -1,12 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import PromptCard from "./PromptCard";
-import type { Prompt } from "@/types/prompt";
-import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useVerification } from "@/contexts/VerificationContext";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Search } from "lucide-react";
+import PromptCard, { Prompt } from "./PromptCard";
+import { useSession } from "next-auth/react";
 
 interface PromptGridProps {
   prompts: Prompt[];
@@ -15,36 +14,44 @@ interface PromptGridProps {
 export default function PromptGrid({
   prompts: initialPrompts,
 }: PromptGridProps) {
+  const { data: session } = useSession();
   const [prompts, setPrompts] = useState<Prompt[]>(initialPrompts);
   const [searchQuery, setSearchQuery] = useState("");
   const [pinnedIds, setPinnedIds] = useState<number[]>([]);
-  const { nullifierHash } = useVerification();
+
+  useEffect(() => {
+    setPrompts(initialPrompts);
+  }, [initialPrompts]);
 
   useEffect(() => {
     async function fetchPinned() {
-      if (!nullifierHash) return;
-      const res = await fetch("/api/prompts/pinned", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nullifier_hash: nullifierHash }),
-      });
-      const data = await res.json();
-      if (data.prompts && Array.isArray(data.prompts)) {
-        setPinnedIds(data.prompts.map((p: any) => Number(p.id)));
+      if (!session?.user) return;
+
+      try {
+        const res = await fetch("/api/prompts/pinned", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const data = await res.json();
+        if (data.prompts && Array.isArray(data.prompts)) {
+          setPinnedIds(data.prompts.map((p: any) => Number(p.id)));
+        }
+      } catch (error) {
+        console.error("Error fetching pinned prompts:", error);
       }
     }
     fetchPinned();
-  }, [nullifierHash]);
+  }, [session]);
 
-  const handleUsePrompt = async (promptId: string) => {
-    setPrompts((prevPrompts) =>
-      prevPrompts.map((prompt) =>
-        prompt.id === promptId
-          ? { ...prompt, usage_count: prompt.usage_count + 1 }
-          : prompt
-      )
-    );
-    console.log(`Prompt ${promptId} used - will update in database`);
+  const handlePinPrompt = (promptId: string, pinned: boolean) => {
+    // Update local state to reflect pinning changes
+    if (pinned) {
+      setPinnedIds((prev) => [...prev, Number(promptId)]);
+    } else {
+      setPinnedIds((prev) => prev.filter((id) => id !== Number(promptId)));
+    }
   };
 
   const getFilteredPrompts = (category: string) => {
@@ -151,7 +158,7 @@ export default function PromptGrid({
               <PromptCard
                 key={prompt.id}
                 prompt={prompt}
-                onUse={handleUsePrompt}
+                onPin={handlePinPrompt}
                 isPinned={pinnedIds.includes(Number(prompt.id))}
               />
             ))}
@@ -164,7 +171,7 @@ export default function PromptGrid({
               <PromptCard
                 key={prompt.id}
                 prompt={prompt}
-                onUse={handleUsePrompt}
+                onPin={handlePinPrompt}
                 isPinned={pinnedIds.includes(Number(prompt.id))}
               />
             ))}
@@ -177,7 +184,7 @@ export default function PromptGrid({
               <PromptCard
                 key={prompt.id}
                 prompt={prompt}
-                onUse={handleUsePrompt}
+                onPin={handlePinPrompt}
                 isPinned={pinnedIds.includes(Number(prompt.id))}
               />
             ))}
@@ -190,7 +197,7 @@ export default function PromptGrid({
               <PromptCard
                 key={prompt.id}
                 prompt={prompt}
-                onUse={handleUsePrompt}
+                onPin={handlePinPrompt}
                 isPinned={pinnedIds.includes(Number(prompt.id))}
               />
             ))}
@@ -203,7 +210,7 @@ export default function PromptGrid({
               <PromptCard
                 key={prompt.id}
                 prompt={prompt}
-                onUse={handleUsePrompt}
+                onPin={handlePinPrompt}
                 isPinned={pinnedIds.includes(Number(prompt.id))}
               />
             ))}

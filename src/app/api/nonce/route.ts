@@ -6,7 +6,8 @@ export async function GET(req: NextRequest) {
   const nonce = crypto.randomUUID().replace(/-/g, "");
 
   // Store the nonce in a secure cookie
-  cookies().set("siwe", nonce, {
+  const cookieStore = await cookies();
+  cookieStore.set("siwe", nonce, {
     secure: true,
     httpOnly: true,
     sameSite: "lax",
