@@ -4,14 +4,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
-import { useVerification } from "@/contexts/VerificationContext";
+import { useSession } from "next-auth/react";
 import { CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 export default function PromptForm() {
   const router = useRouter();
-  const { isVerified, nullifierHash } = useVerification();
+  const { data: session, status } = useSession();
   const [text, setText] = useState("");
   const [modelTag, setModelTag] = useState("");
   const [sourceTag, setSourceTag] = useState("");
@@ -39,7 +39,8 @@ export default function PromptForm() {
         source_tag: sourceTag,
         tags: tagArray,
         type: "submitted",
-        created_by: nullifierHash || "anonymous",
+        created_by: (session?.user as any)?.address || "anonymous",
+        user_id: (session?.user as any)?.id || null,
         usage_count: 0,
         pin_count: 0,
       },
@@ -56,13 +57,22 @@ export default function PromptForm() {
     }
   }
 
-  // Show verification prompt if not verified
-  if (!isVerified) {
+  // Show loading state
+  if (status === "loading") {
     return (
       <div className="text-center text-sm text-gray-400 mt-6">
-        <p>Please verify with World ID to submit prompts.</p>
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  // Show sign in prompt if not authenticated
+  if (!session?.user) {
+    return (
+      <div className="text-center text-sm text-gray-400 mt-6">
+        <p>Please sign in with World ID to submit prompts.</p>
         <p className="text-xs mt-2">
-          You'll be redirected here after verification.
+          You'll be redirected here after signing in.
         </p>
       </div>
     );
@@ -70,12 +80,10 @@ export default function PromptForm() {
 
   if (success) {
     return (
-      <div className="text-center space-y-4">
-        <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto" />
-        <h2 className="text-2xl font-medium text-gray-200">
-          Prompt Submitted!
-        </h2>
-        <p className="text-gray-400">Redirecting to community page...</p>
+      <div className="text-center text-sm text-green-400 mt-6">
+        <CheckCircle2 className="w-8 h-8 mx-auto mb-2" />
+        <p>Prompt submitted successfully!</p>
+        <p className="text-xs mt-2">Redirecting to community...</p>
       </div>
     );
   }
@@ -83,77 +91,63 @@ export default function PromptForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <label
-          htmlFor="text"
-          className="block text-sm font-medium text-gray-300 mb-2"
-        >
+        <label className="block text-sm font-medium text-gray-300 mb-2">
           Prompt Text
         </label>
         <Textarea
-          id="text"
           value={text}
           onChange={(e) => setText(e.target.value)}
-          className="w-full bg-gray-800/50 border-gray-700/50 text-gray-200 placeholder-gray-500 focus:border-gray-600 focus:ring-gray-600"
+          placeholder="Enter your prompt here..."
+          className="w-full bg-gray-700 border-gray-600 text-gray-200 placeholder-gray-400"
           rows={4}
           required
         />
       </div>
 
-      <div>
-        <label
-          htmlFor="modelTag"
-          className="block text-sm font-medium text-gray-300 mb-2"
-        >
-          Model Tag
-        </label>
-        <Input
-          type="text"
-          id="modelTag"
-          value={modelTag}
-          onChange={(e) => setModelTag(e.target.value)}
-          className="w-full bg-gray-800/50 border-gray-700/50 text-gray-200 placeholder-gray-500 focus:border-gray-600 focus:ring-gray-600"
-          required
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            Model Tag
+          </label>
+          <Input
+            type="text"
+            value={modelTag}
+            onChange={(e) => setModelTag(e.target.value)}
+            placeholder="e.g., GPT-4, Claude"
+            className="bg-gray-700 border-gray-600 text-gray-200 placeholder-gray-400"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            Source Tag
+          </label>
+          <Input
+            type="text"
+            value={sourceTag}
+            onChange={(e) => setSourceTag(e.target.value)}
+            placeholder="e.g., Community, Tutorial"
+            className="bg-gray-700 border-gray-600 text-gray-200 placeholder-gray-400"
+          />
+        </div>
       </div>
 
       <div>
-        <label
-          htmlFor="sourceTag"
-          className="block text-sm font-medium text-gray-300 mb-2"
-        >
-          Source Tag
-        </label>
-        <Input
-          type="text"
-          id="sourceTag"
-          value={sourceTag}
-          onChange={(e) => setSourceTag(e.target.value)}
-          className="w-full bg-gray-800/50 border-gray-700/50 text-gray-200 placeholder-gray-500 focus:border-gray-600 focus:ring-gray-600"
-          required
-        />
-      </div>
-
-      <div>
-        <label
-          htmlFor="tags"
-          className="block text-sm font-medium text-gray-300 mb-2"
-        >
+        <label className="block text-sm font-medium text-gray-300 mb-2">
           Tags (comma-separated)
         </label>
         <Input
           type="text"
-          id="tags"
           value={tags}
           onChange={(e) => setTags(e.target.value)}
-          className="w-full bg-gray-800/50 border-gray-700/50 text-gray-200 placeholder-gray-500 focus:border-gray-600 focus:ring-gray-600"
-          placeholder="e.g. writing, creative, business"
-          required
+          placeholder="e.g., creative, writing, brainstorming"
+          className="bg-gray-700 border-gray-600 text-gray-200 placeholder-gray-400"
         />
       </div>
 
       <Button
         type="submit"
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
         disabled={loading}
       >
         {loading ? "Submitting..." : "Submit Prompt"}

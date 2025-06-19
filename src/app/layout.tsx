@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { MiniKitProvider } from "@worldcoin/minikit-js/minikit-provider";
 import { ErudaProvider } from "@/contexts/Eruda/ErudaContext";
-import { VerificationProvider } from "@/contexts/VerificationContext";
+import { SessionProvider } from "next-auth/react";
 import { Toaster } from "sonner";
 
 const geistSans = Geist({
@@ -32,7 +32,7 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <VerificationProvider>
+          <SessionProvider>
             <ErudaProvider>{children}</ErudaProvider>
             <Toaster
               position="bottom-right"
@@ -44,7 +44,7 @@ export default function RootLayout({
                 },
               }}
             />
-          </VerificationProvider>
+          </SessionProvider>
         </body>
       </MiniKitProvider>
     </html>

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { auth } from "@/app/api/auth";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,18 +9,19 @@ const supabase = createClient(
 
 export async function POST(req: Request) {
   try {
-    const { nullifier_hash } = await req.json();
-    if (!nullifier_hash) {
+    const session = await auth();
+    if (!session?.user?.id) {
       return NextResponse.json(
-        { error: "Missing nullifier_hash" },
-        { status: 400 }
+        { error: "Authentication required" },
+        { status: 401 }
       );
     }
+
     // Get all pinned prompt IDs for this user
     const { data: pinned, error: pinError } = await supabase
       .from("pinned")
       .select("prompt_id")
-      .eq("nullifier_hash", nullifier_hash);
+      .eq("user_id", session.user.id);
     if (pinError) {
       console.error("PINNED API pinError:", pinError);
       return NextResponse.json({ error: pinError.message }, { status: 500 });

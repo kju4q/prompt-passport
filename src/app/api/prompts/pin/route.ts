@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { auth } from "@/app/api/auth";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,19 +9,25 @@ const supabase = createClient(
 
 export async function POST(req: Request) {
   try {
-    const { prompt_id, nullifier_hash, pin } = await req.json();
-    if (!prompt_id || !nullifier_hash) {
+    const session = await auth();
+    if (!session?.user?.id) {
       return NextResponse.json(
-        { error: "Missing prompt_id or nullifier_hash" },
-        { status: 400 }
+        { error: "Authentication required" },
+        { status: 401 }
       );
     }
+
+    const { prompt_id, pin } = await req.json();
+    if (!prompt_id) {
+      return NextResponse.json({ error: "Missing prompt_id" }, { status: 400 });
+    }
+
     if (pin) {
       // Pin: insert if not exists
       const { error } = await supabase
         .from("pinned")
-        .upsert([{ prompt_id, nullifier_hash }], {
-          onConflict: "prompt_id,nullifier_hash",
+        .upsert([{ prompt_id, user_id: session.user.id }], {
+          onConflict: "prompt_id,user_id",
         });
       if (error)
         return NextResponse.json({ error: error.message }, { status: 500 });
@@ -31,7 +38,7 @@ export async function POST(req: Request) {
         .from("pinned")
         .delete()
         .eq("prompt_id", prompt_id)
-        .eq("nullifier_hash", nullifier_hash);
+        .eq("user_id", session.user.id);
       if (error)
         return NextResponse.json({ error: error.message }, { status: 500 });
       return NextResponse.json({ success: true });

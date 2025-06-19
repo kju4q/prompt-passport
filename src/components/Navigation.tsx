@@ -1,12 +1,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useVerification } from "@/contexts/VerificationContext";
-import { Pin } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { Pin, User } from "lucide-react";
 
 export default function Navigation() {
   const pathname = usePathname();
-  const { isVerified } = useVerification();
-  console.log("Navigation isVerified:", isVerified);
+  const { data: session } = useSession();
 
   return (
     <nav className="flex items-center space-x-6">
@@ -26,7 +25,7 @@ export default function Navigation() {
       >
         TikTok
       </Link>
-      {isVerified && (
+      {session?.user && (
         <>
           <Link
             href="/community"
@@ -44,6 +43,15 @@ export default function Navigation() {
             }`}
           >
             <Pin className="h-4 w-4 text-blue-400" />
+          </Link>
+          <Link
+            href="/profile"
+            title="User profile"
+            className={`flex items-center transition-colors hover:text-white ${
+              pathname === "/profile" ? "text-white" : "text-gray-400"
+            }`}
+          >
+            <User className="h-4 w-4 text-green-400" />
           </Link>
         </>
       )}

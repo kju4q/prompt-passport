@@ -3,10 +3,10 @@
 import PromptForm from "../PromptForm";
 import PassportIcon from "@/components/ui/passportIcon";
 import Link from "next/link";
-import { useVerification } from "@/contexts/VerificationContext";
+import { useSession } from "next-auth/react";
 
 export default function CreatePromptPage() {
-  const { isVerified } = useVerification();
+  const { data: session, status } = useSession();
 
   return (
     <div className="min-h-screen bg-gray-900">
@@ -30,11 +30,15 @@ export default function CreatePromptPage() {
             </h1>
           </div>
 
-          {/* World ID Status */}
+          {/* Auth Status */}
           <div>
-            {isVerified ? (
+            {status === "loading" ? (
+              <span className="text-sm text-gray-400 font-medium">
+                Loading...
+              </span>
+            ) : session?.user ? (
               <span className="text-sm text-green-400 font-medium">
-                Verified
+                Signed In
               </span>
             ) : (
               <span className="text-sm text-gray-400 font-medium">
