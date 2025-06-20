@@ -18,15 +18,30 @@ export async function POST(req: Request) {
     const { data: currentData, error: fetchError } = await supabase
       .from("prompts")
       .select("usage_count")
-      .eq("id", id)
-      .single();
+      .eq("id", id);
 
     if (fetchError) {
       console.error("🔍 Increment Usage Debug - Fetch error:", fetchError);
       return NextResponse.json({ error: fetchError.message }, { status: 500 });
     }
 
-    const currentUsageCount = (currentData?.usage_count as number) || 0;
+    if (!currentData || currentData.length === 0) {
+      console.error("🔍 Increment Usage Debug - No prompt found with id:", id);
+      return NextResponse.json({ error: "Prompt not found" }, { status: 404 });
+    }
+
+    if (currentData.length > 1) {
+      console.error(
+        "🔍 Increment Usage Debug - Multiple prompts found with id:",
+        id
+      );
+      return NextResponse.json(
+        { error: "Multiple prompts found" },
+        { status: 500 }
+      );
+    }
+
+    const currentUsageCount = (currentData[0]?.usage_count as number) || 0;
     const newUsageCount = currentUsageCount + 1;
 
     // Update with the new usage count
