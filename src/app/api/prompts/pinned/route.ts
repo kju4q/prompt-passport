@@ -28,7 +28,8 @@ export async function POST(req: Request) {
     }
     const promptIds = pinned.map((p: any) => p.prompt_id);
     if (promptIds.length === 0) return NextResponse.json({ prompts: [] });
-    // Fetch the prompt details
+
+    // Fetch the prompt details with all necessary fields
     const { data: prompts, error: promptError } = await supabase
       .from("prompts")
       .select("*")
@@ -37,7 +38,20 @@ export async function POST(req: Request) {
       console.error("PINNED API promptError:", promptError);
       return NextResponse.json({ error: promptError.message }, { status: 500 });
     }
-    return NextResponse.json({ prompts });
+
+    // Transform the data to ensure compatibility with PromptCard
+    const transformedPrompts = prompts.map((prompt: any) => ({
+      ...prompt,
+      // Ensure we have the expected fields
+      title:
+        prompt.title ||
+        (prompt.text ? prompt.text.slice(0, 50) + "..." : "Untitled Prompt"),
+      content: prompt.content || prompt.text,
+      creator: prompt.creator || prompt.created_by || "Edge Esmeralda",
+      source: prompt.source || prompt.source_tag || "community",
+    }));
+
+    return NextResponse.json({ prompts: transformedPrompts });
   } catch (error) {
     console.error("PINNED API catch error:", error);
     return NextResponse.json(

@@ -28,6 +28,12 @@ export default function CreatePromptPage() {
             <h1 className="text-base font-medium text-gray-300 tracking-wide">
               Create Prompt
             </h1>
+            <Link
+              href="/community"
+              className="text-sm font-medium text-emerald-400 hover:text-emerald-300 transition-colors"
+            >
+              Edge Esmeralda
+            </Link>
           </div>
 
           {/* Auth Status */}

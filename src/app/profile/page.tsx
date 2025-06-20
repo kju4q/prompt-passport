@@ -8,10 +8,41 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { User, Plus, Bookmark, FileText, Calendar } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [stats, setStats] = useState({
+    promptsCreated: 0,
+    promptsPinned: 0,
+    totalUsage: 0,
+  });
+  const [statsLoading, setStatsLoading] = useState(true);
+
+  // Fetch user stats
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (!session?.user) {
+        setStatsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/user/stats");
+        if (response.ok) {
+          const data = await response.json();
+          setStats(data);
+        }
+      } catch (error) {
+        console.error("Error fetching user stats:", error);
+      } finally {
+        setStatsLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, [session]);
 
   // Show loading state
   if (status === "loading") {
@@ -50,6 +81,11 @@ export default function ProfilePage() {
   const userAddress = (session.user as any).address;
   const userId = (session.user as any).id;
 
+  // Generate a user-friendly display name from wallet address
+  const displayName = userAddress
+    ? `User ${userAddress.slice(2, 6).toUpperCase()}`
+    : "User";
+
   return (
     <div className="min-h-screen bg-gray-900">
       {/* Header */}
@@ -70,6 +106,12 @@ export default function ProfilePage() {
             <h1 className="text-base font-medium text-gray-300 tracking-wide">
               Profile
             </h1>
+            <Link
+              href="/community"
+              className="text-sm font-medium text-emerald-400 hover:text-emerald-300 transition-colors"
+            >
+              Edge Esmeralda
+            </Link>
           </div>
 
           {/* Create Button */}
@@ -93,7 +135,7 @@ export default function ProfilePage() {
             <CardHeader>
               <CardTitle className="text-gray-200 flex items-center gap-2">
                 <User className="w-5 h-5" />
-                User Profile
+                {displayName}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -102,16 +144,19 @@ export default function ProfilePage() {
                   <label className="text-sm font-medium text-gray-400">
                     Wallet Address
                   </label>
-                  <p className="text-gray-200 font-mono text-sm">
-                    {userAddress?.slice(0, 6)}...{userAddress?.slice(-4)}
+                  <p className="text-gray-200 font-mono text-sm bg-gray-900/50 px-3 py-2 rounded border border-gray-700/50">
+                    {userAddress?.slice(0, 8)}...{userAddress?.slice(-6)}
                   </p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-400">
-                    User ID
+                    Member Since
                   </label>
-                  <p className="text-gray-200 font-mono text-sm">
-                    {userId?.slice(0, 8)}...
+                  <p className="text-gray-200 text-sm">
+                    {new Date().toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                    })}
                   </p>
                 </div>
               </div>
@@ -175,15 +220,21 @@ export default function ProfilePage() {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                 <div>
-                  <div className="text-2xl font-bold text-blue-400">0</div>
+                  <div className="text-2xl font-bold text-blue-400">
+                    {statsLoading ? "..." : stats.promptsCreated}
+                  </div>
                   <div className="text-sm text-gray-400">Prompts Created</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-yellow-400">0</div>
+                  <div className="text-2xl font-bold text-yellow-400">
+                    {statsLoading ? "..." : stats.promptsPinned}
+                  </div>
                   <div className="text-sm text-gray-400">Prompts Pinned</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-green-400">0</div>
+                  <div className="text-2xl font-bold text-green-400">
+                    {statsLoading ? "..." : stats.totalUsage}
+                  </div>
                   <div className="text-sm text-gray-400">Total Usage</div>
                 </div>
               </div>
