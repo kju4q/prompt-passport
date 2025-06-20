@@ -9,15 +9,17 @@ import { useSession } from "next-auth/react";
 
 interface PromptGridProps {
   prompts: Prompt[];
+  onPinChange?: (promptId: string, pinned: boolean) => void;
 }
 
 export default function PromptGrid({
   prompts: initialPrompts,
+  onPinChange,
 }: PromptGridProps) {
   const { data: session } = useSession();
   const [prompts, setPrompts] = useState<Prompt[]>(initialPrompts);
   const [searchQuery, setSearchQuery] = useState("");
-  const [pinnedIds, setPinnedIds] = useState<number[]>([]);
+  const [pinnedIds, setPinnedIds] = useState<string[]>([]);
 
   useEffect(() => {
     setPrompts(initialPrompts);
@@ -36,7 +38,7 @@ export default function PromptGrid({
         });
         const data = await res.json();
         if (data.prompts && Array.isArray(data.prompts)) {
-          setPinnedIds(data.prompts.map((p: any) => Number(p.id)));
+          setPinnedIds(data.prompts.map((p: any) => p.id));
         }
       } catch (error) {
         console.error("Error fetching pinned prompts:", error);
@@ -48,9 +50,14 @@ export default function PromptGrid({
   const handlePinPrompt = (promptId: string, pinned: boolean) => {
     // Update local state to reflect pinning changes
     if (pinned) {
-      setPinnedIds((prev) => [...prev, Number(promptId)]);
+      setPinnedIds((prev) => [...prev, promptId]);
     } else {
-      setPinnedIds((prev) => prev.filter((id) => id !== Number(promptId)));
+      setPinnedIds((prev) => prev.filter((id) => id !== promptId));
+    }
+
+    // Call parent callback if provided
+    if (onPinChange) {
+      onPinChange(promptId, pinned);
     }
   };
 
@@ -147,7 +154,7 @@ export default function PromptGrid({
                 key={prompt.id}
                 prompt={prompt}
                 onPin={handlePinPrompt}
-                isPinned={pinnedIds.includes(Number(prompt.id))}
+                isPinned={pinnedIds.includes(prompt.id)}
               />
             ))}
           </div>
@@ -160,7 +167,7 @@ export default function PromptGrid({
                 key={prompt.id}
                 prompt={prompt}
                 onPin={handlePinPrompt}
-                isPinned={pinnedIds.includes(Number(prompt.id))}
+                isPinned={pinnedIds.includes(prompt.id)}
               />
             ))}
           </div>
@@ -173,7 +180,7 @@ export default function PromptGrid({
                 key={prompt.id}
                 prompt={prompt}
                 onPin={handlePinPrompt}
-                isPinned={pinnedIds.includes(Number(prompt.id))}
+                isPinned={pinnedIds.includes(prompt.id)}
               />
             ))}
           </div>

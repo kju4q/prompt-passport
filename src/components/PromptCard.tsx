@@ -42,6 +42,11 @@ export default function PromptCard({
   const [pinned, setPinned] = useState(isPinned || false);
   const [loading, setLoading] = useState(false);
 
+  // Update local state when isPinned prop changes
+  useEffect(() => {
+    setPinned(isPinned || false);
+  }, [isPinned]);
+
   const handleCopy = async () => {
     const textToCopy = prompt.text || prompt.content;
     try {

@@ -14,37 +14,44 @@ export default function PinnedPage() {
   const [prompts, setPrompts] = useState([]);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchPinnedPrompts = async () => {
+    if (!session?.user) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/prompts/pinned", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch pinned prompts");
+      }
+
+      const data = await response.json();
+      setPrompts(data.prompts);
+    } catch (err) {
+      console.error("Error fetching pinned prompts:", err);
+      setError("Failed to load pinned prompts");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchPinnedPrompts = async () => {
-      if (!session?.user) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const response = await fetch("/api/prompts/pinned", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch pinned prompts");
-        }
-
-        const data = await response.json();
-        setPrompts(data.prompts);
-      } catch (err) {
-        console.error("Error fetching pinned prompts:", err);
-        setError("Failed to load pinned prompts");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchPinnedPrompts();
   }, [session]);
+
+  const handlePinChange = (promptId: string, pinned: boolean) => {
+    // If a prompt was unpinned, refresh the list
+    if (!pinned) {
+      fetchPinnedPrompts();
+    }
+  };
 
   // Show loading state
   if (status === "loading") {
@@ -160,7 +167,7 @@ export default function PinnedPage() {
             </Link>
           </div>
         ) : (
-          <PromptGrid prompts={prompts} />
+          <PromptGrid prompts={prompts} onPinChange={handlePinChange} />
         )}
       </main>
     </div>

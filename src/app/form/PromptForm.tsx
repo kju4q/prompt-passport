@@ -80,10 +80,14 @@ export default function PromptForm() {
 
   if (success) {
     return (
-      <div className="text-center text-sm text-green-400 mt-6">
-        <CheckCircle2 className="w-8 h-8 mx-auto mb-2" />
-        <p>Prompt submitted successfully!</p>
-        <p className="text-xs mt-2">Redirecting to community...</p>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center text-sm text-green-400">
+          <CheckCircle2 className="w-12 h-12 mx-auto mb-4 text-green-400" />
+          <p className="text-lg font-medium mb-2">
+            Prompt submitted successfully!
+          </p>
+          <p className="text-xs text-gray-400">Redirecting to community...</p>
+        </div>
       </div>
     );
   }
