@@ -562,9 +562,10 @@ export default function EvolutionTree({
 
           {node.children &&
             node.children.map((child: any, index: any) => {
-              const childAngle =
-                angle +
-                (index - (node.children.length - 1) / 2) * (Math.PI / 4);
+              // Use the same balanced distribution for child nodes
+              const totalChildren = node.children.length;
+              const childAngleStep = (2 * Math.PI) / Math.max(totalChildren, 1);
+              const childAngle = angle + childAngleStep * index;
               const childDistance = 160; // Fixed distance for better mobile experience
               return (
                 <EvolutionNode
@@ -625,13 +626,19 @@ export default function EvolutionTree({
                 >
                   {treeData[0].children &&
                     treeData[0].children.map((child: any, index: any) => {
-                      const angle =
-                        (Math.PI / 3) *
-                        (index - (treeData[0].children.length - 1) / 2);
-                      const distance =
+                      // Create a more balanced distribution in all directions
+                      const totalChildren = treeData[0].children.length;
+                      const angleStep =
+                        (2 * Math.PI) / Math.max(totalChildren, 1);
+                      const angle = angleStep * index;
+
+                      // Vary the distance based on position to create more visual interest
+                      const baseDistance =
                         typeof window !== "undefined" && window.innerWidth < 768
                           ? 200
                           : 300;
+                      const distance = baseDistance + (index % 2) * 50; // Alternate between base and base+50
+
                       return (
                         <EvolutionNode
                           key={child.id}
