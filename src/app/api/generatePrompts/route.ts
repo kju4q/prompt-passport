@@ -69,6 +69,12 @@ export async function POST() {
       if (insertError) {
         console.error("Error inserting generated prompts:", insertError);
         // Continue anyway, return the prompts even if database insert fails
+      } else {
+        console.log(
+          "Successfully inserted",
+          promptsToInsert.length,
+          "prompts to database"
+        );
       }
 
       const enriched = promptsToInsert.map((p: any) => ({

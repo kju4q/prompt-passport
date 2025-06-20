@@ -51,6 +51,11 @@ export default function PromptCard({
 
   // Update usage count when prompt prop changes
   useEffect(() => {
+    console.log("🔍 Prompt Debug - Prompt data:", {
+      id: prompt.id,
+      usage_count: prompt.usage_count,
+      title: prompt.title,
+    });
     setUsageCount(prompt.usage_count || 0);
   }, [prompt.usage_count]);
 
@@ -123,6 +128,9 @@ export default function PromptCard({
   };
 
   const handleUsageIncrement = async () => {
+    console.log("🔍 Usage Debug - Starting increment for prompt:", prompt.id);
+    console.log("🔍 Usage Debug - Current usage count:", usageCount);
+
     try {
       const response = await fetch("/api/prompts/increment-usage", {
         method: "POST",
@@ -132,12 +140,26 @@ export default function PromptCard({
         body: JSON.stringify({ id: prompt.id }),
       });
 
+      console.log("🔍 Usage Debug - Response status:", response.status);
+
       if (response.ok) {
         // Update local usage count immediately
-        setUsageCount((prev) => prev + 1);
+        setUsageCount((prev) => {
+          const newCount = prev + 1;
+          console.log(
+            "🔍 Usage Debug - Updated count from",
+            prev,
+            "to",
+            newCount
+          );
+          return newCount;
+        });
+      } else {
+        const errorData = await response.json();
+        console.error("🔍 Usage Debug - API error:", errorData);
       }
     } catch (error) {
-      console.error("Failed to increment usage:", error);
+      console.error("🔍 Usage Debug - Network error:", error);
     }
   };
 
