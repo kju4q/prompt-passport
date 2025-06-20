@@ -214,51 +214,6 @@ export default function PromptDetailPage({
                 🧬 Prompt Evolution Tree
               </h1>
               <PromptCard prompt={prompt} showFullContent={true} />
-
-              {/* Evolution Buttons */}
-              <div className="mt-6 bg-gray-800/50 rounded-xl p-6 border border-gray-700/50">
-                <h3 className="text-lg font-semibold text-gray-200 mb-4">
-                  🚀 Evolve This Prompt
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                  <Button
-                    onClick={() =>
-                      router.push(`/prompt/${promptId}?evolve=creative`)
-                    }
-                    className="bg-gray-700 hover:bg-gray-600 text-gray-200"
-                    disabled={isEvolving}
-                  >
-                    Creative
-                  </Button>
-                  <Button
-                    onClick={() =>
-                      router.push(`/prompt/${promptId}?evolve=professional`)
-                    }
-                    className="bg-gray-700 hover:bg-gray-600 text-gray-200"
-                    disabled={isEvolving}
-                  >
-                    Professional
-                  </Button>
-                  <Button
-                    onClick={() =>
-                      router.push(`/prompt/${promptId}?evolve=detailed`)
-                    }
-                    className="bg-gray-700 hover:bg-gray-600 text-gray-200"
-                    disabled={isEvolving}
-                  >
-                    Add Details
-                  </Button>
-                  <Button
-                    onClick={() =>
-                      router.push(`/prompt/${promptId}?evolve=manual`)
-                    }
-                    className="bg-gray-700 hover:bg-gray-600 text-gray-200"
-                    disabled={isEvolving}
-                  >
-                    Edit Yourself
-                  </Button>
-                </div>
-              </div>
             </div>
 
             {/* Evolution in Progress */}

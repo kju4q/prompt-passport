@@ -267,7 +267,7 @@ export default function PromptCard({
         toast.success("Evolution saved to community!");
         setShowEvolutionModal(false);
         setEvolutionResult("");
-        // Redirect to the details page to see the evolution tree
+        // Redirect to the details page to see the evolution tree for ALL evolution types
         window.location.href = `/prompt/${prompt.id}`;
       }
     } catch (error) {
@@ -481,6 +481,8 @@ export default function PromptCard({
                         toast.success("Manual evolution saved!");
                         setShowEvolutionModal(false);
                         setEvolutionResult("");
+                        // Redirect to the details page to see the evolution tree
+                        window.location.href = `/prompt/${prompt.id}`;
                       }
                     }}
                     className="flex-1 bg-green-600 hover:bg-green-700 text-white text-sm"

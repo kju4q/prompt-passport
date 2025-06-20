@@ -290,6 +290,7 @@ export default function EvolutionTree({
     }) => {
       const isSelected = selectedNode === node.id;
 
+      // Adjust positioning for better mobile experience
       const x = parentX + Math.cos(angle) * distance;
       const y = parentY + Math.sin(angle) * distance;
 
@@ -300,6 +301,7 @@ export default function EvolutionTree({
             left: `calc(50% + ${x}px)`,
             top: `${y}px`,
             transform: "translate(-50%, -50%)",
+            zIndex: isSelected ? 10 : 1,
           }}
           onClick={() => setSelectedNode(node.id)}
         >
@@ -757,8 +759,8 @@ export default function EvolutionTree({
       </div>
 
       {/* Tree Container - Make it scrollable for mobile */}
-      <div className="w-full overflow-x-auto overflow-y-hidden">
-        <div className="min-w-[800px] min-h-[600px] relative px-4">
+      <div className="w-full overflow-auto">
+        <div className="min-w-[800px] min-h-[600px] relative p-4 sm:p-8">
           {viewMode === "tree" ? <TreeView /> : <LabView />}
         </div>
       </div>
