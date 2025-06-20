@@ -67,7 +67,10 @@ export default function BurgerMenu() {
 
       {/* Backdrop */}
       {isOpen && (
-        <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+        <div
+          className="fixed inset-0 z-40 bg-transparent"
+          onClick={() => setIsOpen(false)}
+        />
       )}
     </div>
   );
