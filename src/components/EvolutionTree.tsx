@@ -36,6 +36,15 @@ export default function EvolutionTree({
   const [treeData, setTreeData] = useState<any[]>([]);
   const [commits, setCommits] = useState<any[]>([]);
 
+  // Add this helper function to format creator names
+  const formatCreatorName = (creator: string) => {
+    if (!creator) return "Unknown";
+    if (creator.startsWith("0x")) {
+      return `User ${creator.slice(2, 6).toUpperCase()}`;
+    }
+    return creator;
+  };
+
   // Build tree structure with real parent-child relationships
   // Update this function in your components/EvolutionTree.tsx
   // Replace the existing buildTreeStructure function with this:
@@ -239,7 +248,7 @@ export default function EvolutionTree({
                   <Zap className="w-3 h-3" />
                   {node.usage_count}
                 </span>
-                <span>@{node.creator}</span>
+                <span>@{formatCreatorName(node.creator)}</span>
               </div>
             </div>
           </div>
@@ -369,7 +378,7 @@ export default function EvolutionTree({
                   <Zap className="w-3 h-3" />
                   {node.usage_count}
                 </span>
-                <span>@{node.creator}</span>
+                <span>@{formatCreatorName(node.creator)}</span>
               </div>
 
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -383,6 +392,54 @@ export default function EvolutionTree({
                   className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
                 >
                   <Copy className="w-3 h-3" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/prompt/${node.id}?evolve=creative`);
+                  }}
+                  className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
+                  title="Evolve Creative"
+                >
+                  🎨
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/prompt/${node.id}?evolve=professional`);
+                  }}
+                  className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
+                  title="Evolve Professional"
+                >
+                  💼
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/prompt/${node.id}?evolve=detailed`);
+                  }}
+                  className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
+                  title="Evolve Detailed"
+                >
+                  📝
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/prompt/${node.id}?evolve=manual`);
+                  }}
+                  className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
+                  title="Edit Yourself"
+                >
+                  ✏️
                 </Button>
               </div>
             </div>
@@ -635,7 +692,7 @@ export default function EvolutionTree({
                     "{event.content}"
                   </p>
                   <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
-                    <span>@{event.creator}</span>
+                    <span>@{formatCreatorName(event.creator)}</span>
                     <span>👍 {event.likes}</span>
                     <span>⚡ {event.usage_count}</span>
                   </div>
@@ -672,34 +729,41 @@ export default function EvolutionTree({
   };
 
   return (
-    <div className="w-full max-w-full px-0 overflow-x-auto">
-      <div className="space-y-6">
-        {/* View Mode Toggle */}
-        <div className="flex justify-center px-4">
-          <div className="flex bg-gray-800/50 rounded-lg p-1 border border-gray-700/50 w-full max-w-xs">
+    <div className="w-full bg-gray-900/50 border-t border-gray-800">
+      {/* View Mode Toggle */}
+      <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold text-gray-200">
+            Evolution Tree
+          </h2>
+          <div className="flex items-center gap-2">
             <Button
+              variant={viewMode === "tree" ? "default" : "outline"}
               size="sm"
-              variant={viewMode === "tree" ? "default" : "ghost"}
               onClick={() => setViewMode("tree")}
-              className="text-sm flex items-center justify-center gap-2 flex-1"
+              className="text-xs"
             >
-              <TreePine className="w-4 h-4" />
-              Tree
+              <TreePine className="w-3 h-3 mr-1" />
+              Tree View
             </Button>
             <Button
+              variant={viewMode === "lab" ? "default" : "outline"}
               size="sm"
-              variant={viewMode === "lab" ? "default" : "ghost"}
               onClick={() => setViewMode("lab")}
-              className="text-sm flex items-center justify-center gap-2 flex-1"
+              className="text-xs"
             >
-              <span className="text-base">🔬</span>
-              Lab
+              <Zap className="w-3 h-3 mr-1" />
+              Lab View
             </Button>
           </div>
         </div>
+      </div>
 
-        {/* Render Current View */}
-        {viewMode === "tree" ? <TreeView /> : <LabView />}
+      {/* Tree Container - Make it scrollable for mobile */}
+      <div className="w-full overflow-x-auto overflow-y-hidden">
+        <div className="min-w-full min-h-[600px] relative">
+          {viewMode === "tree" ? <TreeView /> : <LabView />}
+        </div>
       </div>
     </div>
   );

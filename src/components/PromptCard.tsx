@@ -31,18 +31,23 @@ interface PromptCardProps {
   prompt: Prompt;
   onPin?: (promptId: string, pinned: boolean) => void;
   isPinned?: boolean;
+  showFullContent?: boolean;
 }
 
 export default function PromptCard({
   prompt,
   onPin,
   isPinned,
+  showFullContent,
 }: PromptCardProps) {
   const { data: session } = useSession();
   const [copied, setCopied] = useState(false);
   const [pinned, setPinned] = useState(isPinned || false);
   const [loading, setLoading] = useState(false);
   const [usageCount, setUsageCount] = useState(prompt.usage_count || 0);
+  const [showEvolutionModal, setShowEvolutionModal] = useState(false);
+  const [evolutionLoading, setEvolutionLoading] = useState(false);
+  const [evolutionResult, setEvolutionResult] = useState("");
 
   // Update local state when isPinned prop changes
   useEffect(() => {
@@ -216,6 +221,61 @@ export default function PromptCard({
     await handleUsageIncrement();
   };
 
+  const handleEvolution = async (evolutionType: string) => {
+    if (!session?.user) {
+      toast.error("Please sign in to evolve prompts");
+      return;
+    }
+
+    setEvolutionLoading(true);
+    setEvolutionResult("");
+
+    try {
+      const response = await fetch("/api/prompts/remix", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          originalPrompt: prompt.text || prompt.content,
+          remixType: evolutionType,
+          parentId: prompt.id,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.isManual) {
+        setEvolutionResult(result.remixedPrompt);
+        setEvolutionLoading(false);
+        return;
+      }
+
+      setEvolutionResult(result.remixedPrompt);
+
+      // Save the evolution to the database
+      const saveResponse = await fetch("/api/prompts/save-evolution", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: result.remixedPrompt,
+          parentId: prompt.id,
+          remixType: evolutionType,
+          generation: (prompt.generation || 0) + 1,
+        }),
+      });
+
+      if (saveResponse.ok) {
+        toast.success("Evolution saved to community!");
+        setShowEvolutionModal(false);
+        setEvolutionResult("");
+      }
+    } catch (error) {
+      console.error("Evolution failed:", error);
+      toast.error("Evolution failed");
+    } finally {
+      setEvolutionLoading(false);
+    }
+  };
+
   return (
     <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700/50 hover:border-gray-600/50 transition-all mb-6">
       <div className="space-y-4">
@@ -263,17 +323,22 @@ export default function PromptCard({
 
         {/* Content */}
         <div className="bg-gray-900/50 rounded-lg p-4">
-          <p className="text-gray-300 leading-relaxed line-clamp-2">
+          <p
+            className={`text-gray-300 leading-relaxed ${
+              showFullContent ? "" : "line-clamp-2"
+            }`}
+          >
             {prompt.text || prompt.content}
           </p>
-          {(prompt.text || prompt.content)?.length > 100 && (
-            <Link
-              href={`/prompt/${prompt.id}`}
-              className="text-blue-400 hover:text-blue-300 text-sm mt-2 inline-block"
-            >
-              View more...
-            </Link>
-          )}
+          {!showFullContent &&
+            (prompt.text || prompt.content)?.length > 100 && (
+              <Link
+                href={`/prompt/${prompt.id}`}
+                className="text-blue-400 hover:text-blue-300 text-sm mt-2 inline-block"
+              >
+                View more...
+              </Link>
+            )}
         </div>
 
         {/* Tags */}
@@ -312,9 +377,7 @@ export default function PromptCard({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => {
-                window.open(`/prompt/${prompt.id}?evolve=creative`, "_blank");
-              }}
+              onClick={() => setShowEvolutionModal(true)}
               className="bg-gray-800/50 border-emerald-600 text-emerald-400 hover:bg-emerald-700/20 hover:border-emerald-500"
             >
               🧬 Evolve
@@ -322,6 +385,144 @@ export default function PromptCard({
           </div>
         </div>
       </div>
+
+      {/* Evolution Modal */}
+      {showEvolutionModal && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowEvolutionModal(false)}
+          />
+
+          {/* Modal Content */}
+          <div className="relative w-full max-w-md bg-gray-800 rounded-t-2xl border border-gray-700 shadow-2xl transform transition-all duration-300 ease-out">
+            {/* Handle */}
+            <div className="flex justify-center pt-4 pb-2">
+              <div className="w-12 h-1 bg-gray-600 rounded-full"></div>
+            </div>
+
+            {/* Header */}
+            <div className="px-6 pb-4">
+              <h3 className="text-lg font-semibold text-gray-200 mb-2">
+                🚀 Evolve This Prompt
+              </h3>
+              <p className="text-sm text-gray-400">
+                Choose how you'd like to evolve this prompt
+              </p>
+            </div>
+
+            {/* Evolution Options */}
+            <div className="px-6 pb-6 space-y-3">
+              <Button
+                onClick={() => handleEvolution("creative")}
+                disabled={evolutionLoading}
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white justify-start"
+              >
+                <span className="mr-3">🎨</span>
+                Creative - Make it more imaginative
+              </Button>
+
+              <Button
+                onClick={() => handleEvolution("professional")}
+                disabled={evolutionLoading}
+                className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white justify-start"
+              >
+                <span className="mr-3">💼</span>
+                Professional - Make it more formal
+              </Button>
+
+              <Button
+                onClick={() => handleEvolution("detailed")}
+                disabled={evolutionLoading}
+                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white justify-start"
+              >
+                <span className="mr-3">📝</span>
+                Add Details - Make it more specific
+              </Button>
+
+              <Button
+                onClick={() => handleEvolution("manual")}
+                disabled={evolutionLoading}
+                className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white justify-start"
+              >
+                <span className="mr-3">✏️</span>
+                Edit Yourself - Customize it manually
+              </Button>
+            </div>
+
+            {/* Manual Edit Form */}
+            {evolutionResult && (
+              <div className="px-6 pb-6 border-t border-gray-700 pt-4">
+                <h4 className="text-sm font-medium text-gray-200 mb-3">
+                  ✏️ Edit Your Prompt
+                </h4>
+                <textarea
+                  value={evolutionResult}
+                  onChange={(e) => setEvolutionResult(e.target.value)}
+                  className="w-full h-24 bg-gray-700 rounded-lg p-3 text-gray-200 border border-gray-600 focus:border-blue-500 focus:outline-none resize-none text-sm"
+                  placeholder="Edit your prompt here..."
+                />
+                <div className="flex gap-2 mt-3">
+                  <Button
+                    onClick={async () => {
+                      const saveResponse = await fetch(
+                        "/api/prompts/save-evolution",
+                        {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            content: evolutionResult,
+                            parentId: prompt.id,
+                            remixType: "manual",
+                            generation: (prompt.generation || 0) + 1,
+                          }),
+                        }
+                      );
+                      if (saveResponse.ok) {
+                        toast.success("Manual evolution saved!");
+                        setShowEvolutionModal(false);
+                        setEvolutionResult("");
+                      }
+                    }}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white text-sm"
+                  >
+                    💾 Save Evolution
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setEvolutionResult("")}
+                    className="border-gray-600 text-gray-400 text-sm"
+                  >
+                    ❌ Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Loading State */}
+            {evolutionLoading && (
+              <div className="px-6 pb-6 border-t border-gray-700 pt-4">
+                <div className="flex items-center justify-center gap-3 text-gray-400">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-400"></div>
+                  <span className="text-sm">Creating evolution...</span>
+                </div>
+              </div>
+            )}
+
+            {/* Close Button */}
+            <div className="px-6 pb-6">
+              <Button
+                variant="outline"
+                onClick={() => setShowEvolutionModal(false)}
+                className="w-full border-gray-600 text-gray-400"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

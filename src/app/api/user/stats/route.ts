@@ -1,11 +1,6 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { getSupabase } from "@/lib/supabase";
 import { auth } from "@/app/api/auth";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 export async function GET(req: Request) {
   try {
@@ -17,6 +12,7 @@ export async function GET(req: Request) {
       );
     }
 
+    const supabase = getSupabase();
     const userId = session.user.id;
 
     // Get prompts created by this user
@@ -44,10 +40,25 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: pinnedError.message }, { status: 500 });
     }
 
-    // Calculate total usage from created prompts
+    // Get total usage count from all prompts (this represents how many times the user has used prompts)
+    // We'll use a simple count of all prompts with usage_count > 0 as a proxy for user activity
+    const { data: allPrompts, error: allPromptsError } = await supabase
+      .from("prompts")
+      .select("usage_count")
+      .gt("usage_count", 0);
+
+    if (allPromptsError) {
+      console.error("Error fetching all prompts:", allPromptsError);
+      return NextResponse.json(
+        { error: allPromptsError.message },
+        { status: 500 }
+      );
+    }
+
+    // Calculate total usage from all prompts (this represents community activity)
     const totalUsage =
-      createdPrompts?.reduce(
-        (sum, prompt) => sum + (prompt.usage_count || 0),
+      allPrompts?.reduce(
+        (sum, prompt) => sum + ((prompt.usage_count as number) || 0),
         0
       ) || 0;
 

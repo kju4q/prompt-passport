@@ -109,6 +109,16 @@ export default function PromptDetailPage({
       });
 
       const result = await response.json();
+
+      // Handle manual editing
+      if (result.isManual) {
+        setEvolutionResult(result.remixedPrompt);
+        setEvolutionProgress(100);
+        clearInterval(progressInterval);
+        setIsEvolving(false);
+        return; // Don't save immediately for manual editing
+      }
+
       setEvolutionResult(result.remixedPrompt);
       setEvolutionProgress(100);
 
@@ -203,7 +213,52 @@ export default function PromptDetailPage({
               <h1 className="text-2xl font-bold text-emerald-400 mb-6 flex items-center gap-2">
                 🧬 Prompt Evolution Tree
               </h1>
-              <PromptCard prompt={prompt} />
+              <PromptCard prompt={prompt} showFullContent={true} />
+
+              {/* Evolution Buttons */}
+              <div className="mt-6 bg-gray-800/50 rounded-xl p-6 border border-gray-700/50">
+                <h3 className="text-lg font-semibold text-gray-200 mb-4">
+                  🚀 Evolve This Prompt
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                  <Button
+                    onClick={() =>
+                      router.push(`/prompt/${promptId}?evolve=creative`)
+                    }
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                    disabled={isEvolving}
+                  >
+                    🎨 Creative
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      router.push(`/prompt/${promptId}?evolve=professional`)
+                    }
+                    className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white"
+                    disabled={isEvolving}
+                  >
+                    💼 Professional
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      router.push(`/prompt/${promptId}?evolve=detailed`)
+                    }
+                    className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                    disabled={isEvolving}
+                  >
+                    📝 Add Details
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      router.push(`/prompt/${promptId}?evolve=manual`)
+                    }
+                    className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white"
+                    disabled={isEvolving}
+                  >
+                    ✏️ Edit Yourself
+                  </Button>
+                </div>
+              </div>
             </div>
 
             {/* Evolution in Progress */}
@@ -231,35 +286,95 @@ export default function PromptDetailPage({
               <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-2xl p-6 border border-blue-500/30">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-blue-400">
-                    ✨ New Evolution Created
+                    {evolveType === "manual"
+                      ? "✏️ Edit Your Prompt"
+                      : "✨ New Evolution Created"}
                   </h3>
                   <Badge
                     variant="outline"
                     className="border-purple-500/40 text-purple-400"
                   >
-                    {evolveType} Style
+                    {evolveType === "manual"
+                      ? "Manual Edit"
+                      : `${evolveType} Style`}
                   </Badge>
                 </div>
 
-                <div className="bg-gray-800/50 rounded-lg p-4 mb-4">
-                  <p className="text-gray-200 leading-relaxed">
-                    "{evolutionResult}"
-                  </p>
-                </div>
+                {evolveType === "manual" ? (
+                  <div className="space-y-4">
+                    <textarea
+                      value={evolutionResult}
+                      onChange={(e) => setEvolutionResult(e.target.value)}
+                      className="w-full h-32 bg-gray-800/50 rounded-lg p-4 text-gray-200 border border-gray-600 focus:border-blue-500 focus:outline-none resize-none"
+                      placeholder="Edit your prompt here..."
+                    />
+                    <div className="flex gap-3">
+                      <Button
+                        onClick={async () => {
+                          // Save the manually edited prompt
+                          const saveResponse = await fetch(
+                            "/api/prompts/save-evolution",
+                            {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({
+                                content: evolutionResult,
+                                parentId: prompt.id,
+                                remixType: "manual",
+                                generation: (prompt.generation || 0) + 1,
+                              }),
+                            }
+                          );
+                          if (saveResponse.ok) {
+                            toast.success(
+                              "Manual evolution saved to community!"
+                            );
+                            setEvolutionResult("");
+                            setEvolutionProgress(0);
+                            router.replace(`/prompt/${promptId}`);
+                            loadEvolutionTree(prompt);
+                          }
+                        }}
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        💾 Save Evolution
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setEvolutionResult("");
+                          setEvolutionProgress(0);
+                          router.replace(`/prompt/${promptId}`);
+                        }}
+                        className="border-gray-600"
+                      >
+                        ❌ Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="bg-gray-800/50 rounded-lg p-4 mb-4">
+                      <p className="text-gray-200 leading-relaxed">
+                        "{evolutionResult}"
+                      </p>
+                    </div>
 
-                <div className="flex gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setEvolutionResult("");
-                      setEvolutionProgress(0);
-                      router.replace(`/prompt/${promptId}`);
-                    }}
-                    className="border-gray-600"
-                  >
-                    🔄 Try Again
-                  </Button>
-                </div>
+                    <div className="flex gap-3">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setEvolutionResult("");
+                          setEvolutionProgress(0);
+                          router.replace(`/prompt/${promptId}`);
+                        }}
+                        className="border-gray-600"
+                      >
+                        🔄 Try Again
+                      </Button>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
