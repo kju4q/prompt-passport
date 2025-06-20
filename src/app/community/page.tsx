@@ -3,13 +3,13 @@
 import { useState, useEffect } from "react";
 import PromptGrid from "@/components/PromptGrid";
 import Link from "next/link";
-import { useVerification } from "@/contexts/VerificationContext";
+import { useSession } from "next-auth/react";
 import PassportIcon from "@/components/ui/passportIcon";
 import Navigation from "@/components/Navigation";
 import { Pin } from "lucide-react";
 
 export default function CommunityPage() {
-  const { isVerified } = useVerification();
+  const { data: session } = useSession();
   const [loading, setLoading] = useState(true);
   const [prompts, setPrompts] = useState([]);
   const [error, setError] = useState<string | null>(null);
@@ -54,9 +54,9 @@ export default function CommunityPage() {
 
           {/* World ID Status and Pinned Link */}
           <div>
-            {isVerified ? (
+            {session?.user ? (
               <span className="text-sm text-green-400 font-medium">
-                Verified
+                Signed In
               </span>
             ) : (
               <span className="text-sm text-gray-400 font-medium">

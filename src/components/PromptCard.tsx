@@ -173,17 +173,29 @@ export default function PromptCard({
               <span className="text-blue-400">Gen {prompt.generation}</span>
             )}
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              handleUsageIncrement();
-              handleCopy();
-            }}
-            className="border-gray-600 text-gray-300 hover:bg-gray-700"
-          >
-            Use Prompt
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                handleUsageIncrement();
+                handleCopy();
+              }}
+              className="border-gray-600 text-gray-300 hover:bg-gray-700"
+            >
+              Use Prompt
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                window.open(`/prompt/${prompt.id}?evolve=creative`, "_blank");
+              }}
+              className="border-emerald-600 text-emerald-400 hover:bg-emerald-700/20"
+            >
+              🧬 Evolve
+            </Button>
+          </div>
         </div>
       </div>
     </div>
