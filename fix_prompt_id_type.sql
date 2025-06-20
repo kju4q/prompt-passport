@@ -25,4 +25,23 @@ ALTER TABLE pinned ADD CONSTRAINT pinned_prompt_id_fkey
 -- Verify the change
 SELECT column_name, data_type 
 FROM information_schema.columns 
-WHERE table_name = 'pinned' AND column_name = 'prompt_id'; 
+WHERE table_name = 'pinned' AND column_name = 'prompt_id';
+
+-- Fix the increment_usage_count function to handle TEXT prompt_id properly
+DROP FUNCTION IF EXISTS increment_usage_count(TEXT);
+DROP FUNCTION IF EXISTS increment_usage_count(INTEGER);
+
+CREATE OR REPLACE FUNCTION increment_usage_count(prompt_id TEXT)
+RETURNS VOID AS $$
+BEGIN
+  UPDATE prompts 
+  SET usage_count = usage_count + 1,
+      updated_at = NOW()
+  WHERE id = prompt_id;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Verify the function was created
+SELECT routine_name, routine_type, data_type 
+FROM information_schema.routines 
+WHERE routine_name = 'increment_usage_count'; 
