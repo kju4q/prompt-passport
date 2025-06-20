@@ -1,6 +1,6 @@
 import type { NextAuthConfig } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 
 export const authOptions: NextAuthConfig = {
   secret: process.env.NEXTAUTH_SECRET,
@@ -37,6 +37,8 @@ export const authOptions: NextAuthConfig = {
 
           if (validMessage.isValid) {
             console.log("Creating/updating user in database");
+
+            const supabase = getSupabase();
 
             // Create or update user in Supabase
             const { data: existingUser, error: fetchError } = await supabase
@@ -90,7 +92,7 @@ export const authOptions: NextAuthConfig = {
 
             console.log("Auth successful, returning user:", user.id);
             return {
-              id: user.id,
+              id: user.id as string,
               address: payload.address,
               wallet_address: payload.address,
             };

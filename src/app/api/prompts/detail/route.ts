@@ -36,8 +36,10 @@ export async function GET(req: Request) {
       // Ensure we have the expected fields
       title:
         prompt.title ||
-        (prompt.text ? prompt.text.slice(0, 50) + "..." : "Untitled Prompt"),
-      content: prompt.content || prompt.text,
+        ((prompt.text as string)
+          ? (prompt.text as string).slice(0, 50) + "..."
+          : "Untitled Prompt"),
+      content: prompt.content || (prompt.text as string),
       creator: prompt.creator || prompt.created_by || "Edge Esmeralda",
       source: prompt.source || prompt.source_tag || "community",
     };

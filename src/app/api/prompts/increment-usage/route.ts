@@ -1,10 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { getSupabase } from "@/lib/supabase";
 
 export async function POST(req: Request) {
   try {
@@ -15,6 +10,8 @@ export async function POST(req: Request) {
       console.log("🔍 Increment Usage Debug - Missing prompt id");
       return NextResponse.json({ error: "Missing prompt id" }, { status: 400 });
     }
+
+    const supabase = getSupabase();
 
     // Use direct UPDATE instead of RPC function to avoid function signature issues
     // First get the current usage count
@@ -29,7 +26,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: fetchError.message }, { status: 500 });
     }
 
-    const currentUsageCount = currentData?.usage_count || 0;
+    const currentUsageCount = (currentData?.usage_count as number) || 0;
     const newUsageCount = currentUsageCount + 1;
 
     // Update with the new usage count

@@ -30,10 +30,10 @@ export async function GET(req: Request) {
       // Ensure we have the expected fields
       title:
         evolution.title ||
-        (evolution.text
-          ? evolution.text.slice(0, 50) + "..."
+        ((evolution.text as string)
+          ? (evolution.text as string).slice(0, 50) + "..."
           : "Untitled Prompt"),
-      content: evolution.content || evolution.text,
+      content: evolution.content || (evolution.text as string),
       creator: evolution.creator || evolution.created_by || "Edge Esmeralda",
       source: evolution.source || evolution.source_tag || "community",
     }));
