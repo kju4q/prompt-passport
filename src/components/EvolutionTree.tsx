@@ -77,36 +77,48 @@ export default function EvolutionTree({
     // Create nodes map
     const nodesMap = new Map();
 
-    // Add root node - using your actual Supabase field names
+    // Find the root prompt in the evolution tree data
+    const rootEvolution = evolutionTree.find(
+      (evolution) => evolution.id === prompt.id
+    );
+
+    // Add root node - using the root evolution data if available, otherwise use the prompt
     const rootNode = {
       id: prompt.id,
-      content: prompt.text, // Always use the original prompt's text
-      title: prompt.title || null,
-      creator: prompt.created_by || prompt.creator, // Your field is 'created_by'
-      generation: 0,
+      content: rootEvolution?.text || prompt.text || rootEvolution?.content,
+      title: rootEvolution?.title || prompt.title || null,
+      creator:
+        rootEvolution?.created_by ||
+        prompt.created_by ||
+        rootEvolution?.creator ||
+        prompt.creator,
+      generation: rootEvolution?.generation || 0,
       remix_type: "original",
-      likes: prompt.likes || 0,
-      usage_count: prompt.usage_count || 0,
-      created_at: prompt.created_at,
+      likes: rootEvolution?.likes || prompt.likes || 0,
+      usage_count: rootEvolution?.usage_count || prompt.usage_count || 0,
+      created_at: rootEvolution?.created_at || prompt.created_at,
       parent_id: null,
       children: [],
       level: 0,
     };
     nodesMap.set(prompt.id, rootNode);
 
-    // Add evolution nodes - using your actual Supabase field names
+    // Add evolution nodes - exclude the root prompt to avoid duplication
     evolutionTree.forEach((evolution) => {
+      // Skip if this is the root prompt (we already added it above)
+      if (evolution.id === prompt.id) return;
+
       console.log("Processing evolution:", evolution); // Debug log
 
       const node = {
         id: evolution.id,
-        content: evolution.text || evolution.content, // Your field is 'text'
+        content: evolution.text || evolution.content,
         title:
           evolution.title ||
           `${evolution.remix_type || "Evolution"} by ${evolution.created_by}`,
-        creator: evolution.created_by || evolution.creator, // Your field is 'created_by'
+        creator: evolution.created_by || evolution.creator,
         generation: evolution.generation || 1,
-        remix_type: determineRemixType(evolution), // We'll create this helper function
+        remix_type: determineRemixType(evolution),
         likes: evolution.likes || 0,
         usage_count: evolution.usage_count || 0,
         created_at: evolution.created_at,
@@ -144,11 +156,12 @@ export default function EvolutionTree({
       }
     });
 
-    // Convert to tree structure
+    // Convert to tree structure - only nodes without parents (root level)
     const tree = Array.from(nodesMap.values()).filter(
       (node) => !node.parent_id
     );
     console.log("Final tree structure:", tree); // Debug log
+    console.log("Total nodes in map:", nodesMap.size); // Debug log
     setTreeData(tree);
   };
 
@@ -579,6 +592,12 @@ export default function EvolutionTree({
           </p>
         </div>
 
+        {/* Debug info */}
+        <div className="text-center text-xs text-gray-500 mb-4">
+          Tree nodes: {treeData.length} | Root children:{" "}
+          {treeData[0]?.children?.length || 0}
+        </div>
+
         <div className="relative bg-gray-800/20 rounded-xl p-4 sm:p-8 border border-gray-700/30 overflow-hidden min-h-[600px] sm:min-h-[800px]">
           <div className="absolute inset-0 opacity-5">
             <div
@@ -591,9 +610,9 @@ export default function EvolutionTree({
           </div>
 
           <div className="relative z-10">
-            {treeData.map((rootNode: any, index: any) => (
-              <div key={rootNode.id} className="relative">
-                <DNAHelixOriginal node={rootNode} />
+            {treeData.length > 0 && (
+              <div className="relative">
+                <DNAHelixOriginal node={treeData[0]} />
 
                 <div
                   className="relative"
@@ -604,11 +623,11 @@ export default function EvolutionTree({
                         : "600px",
                   }}
                 >
-                  {rootNode.children &&
-                    rootNode.children.map((child: any, index: any) => {
+                  {treeData[0].children &&
+                    treeData[0].children.map((child: any, index: any) => {
                       const angle =
                         (Math.PI / 3) *
-                        (index - (rootNode.children.length - 1) / 2);
+                        (index - (treeData[0].children.length - 1) / 2);
                       const distance =
                         typeof window !== "undefined" && window.innerWidth < 768
                           ? 200
@@ -626,7 +645,7 @@ export default function EvolutionTree({
                     })}
                 </div>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
