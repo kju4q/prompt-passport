@@ -3,12 +3,13 @@ import { supabase } from "@/lib/supabase";
 
 export async function GET() {
   try {
-    // Fetch only user-submitted prompts (not evolved ones)
+    // Fetch only user-submitted prompts (not evolved ones and not AI-generated)
     const { data: prompts, error } = await supabase
       .from("prompts")
       .select("*")
       .eq("type", "submitted")
       .is("parent_id", null) // Only show original prompts, not evolved ones
+      .neq("source", "AI") // Exclude AI-generated prompts
       .order("created_at", { ascending: false });
 
     if (error) {
