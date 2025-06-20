@@ -66,6 +66,9 @@ export default function PromptDetailPage({
   // Start evolution if evolveType is present
   useEffect(() => {
     if (evolveType && prompt && !isEvolving && !evolutionResult) {
+      // Set loading state immediately
+      setIsEvolving(true);
+      setEvolutionProgress(0);
       startEvolution(evolveType);
     }
   }, [evolveType, prompt]);
@@ -83,8 +86,7 @@ export default function PromptDetailPage({
   };
 
   const startEvolution = async (remixType: string) => {
-    setIsEvolving(true);
-    setEvolutionProgress(0);
+    // Loading state is already set by the useEffect
 
     // Progress animation
     const progressInterval = setInterval(() => {

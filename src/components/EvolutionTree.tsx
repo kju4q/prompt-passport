@@ -35,6 +35,16 @@ export default function EvolutionTree({
   const [selectedNode, setSelectedNode] = useState(null);
   const [treeData, setTreeData] = useState<any[]>([]);
   const [commits, setCommits] = useState<any[]>([]);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "info";
+  } | null>(null);
+
+  // Simple toast notification
+  const showToast = (message: string, type: "success" | "info" = "info") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   // Add this helper function to format creator names
   const formatCreatorName = (creator: string) => {
@@ -250,6 +260,70 @@ export default function EvolutionTree({
                 </span>
                 <span>@{formatCreatorName(node.creator)}</span>
               </div>
+
+              {/* Evolution buttons for original prompt */}
+              <div className="flex items-center gap-1 mt-2 justify-center">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigator.clipboard.writeText(node.content);
+                    showToast("Prompt copied to clipboard!", "success");
+                  }}
+                  className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
+                >
+                  <Copy className="w-3 h-3" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    showToast("Creating creative evolution...", "info");
+                    router.push(`/prompt/${node.id}?evolve=creative`);
+                  }}
+                  className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
+                >
+                  C
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    showToast("Creating professional evolution...", "info");
+                    router.push(`/prompt/${node.id}?evolve=professional`);
+                  }}
+                  className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
+                >
+                  P
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    showToast("Creating detailed evolution...", "info");
+                    router.push(`/prompt/${node.id}?evolve=detailed`);
+                  }}
+                  className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
+                >
+                  D
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    showToast("Opening for manual edit...", "info");
+                    router.push(`/prompt/${node.id}?evolve=manual`);
+                  }}
+                  className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
+                >
+                  E
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -383,13 +457,14 @@ export default function EvolutionTree({
                 <span>@{formatCreatorName(node.creator)}</span>
               </div>
 
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex items-center gap-1">
                 <Button
                   size="sm"
                   variant="ghost"
                   onClick={(e) => {
                     e.stopPropagation();
                     navigator.clipboard.writeText(node.content);
+                    showToast("Prompt copied to clipboard!", "success");
                   }}
                   className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
                 >
@@ -400,10 +475,10 @@ export default function EvolutionTree({
                   variant="ghost"
                   onClick={(e) => {
                     e.stopPropagation();
+                    showToast("Creating creative evolution...", "info");
                     router.push(`/prompt/${node.id}?evolve=creative`);
                   }}
                   className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
-                  title="Creative"
                 >
                   C
                 </Button>
@@ -412,10 +487,10 @@ export default function EvolutionTree({
                   variant="ghost"
                   onClick={(e) => {
                     e.stopPropagation();
+                    showToast("Creating professional evolution...", "info");
                     router.push(`/prompt/${node.id}?evolve=professional`);
                   }}
                   className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
-                  title="Professional"
                 >
                   P
                 </Button>
@@ -424,10 +499,10 @@ export default function EvolutionTree({
                   variant="ghost"
                   onClick={(e) => {
                     e.stopPropagation();
+                    showToast("Creating detailed evolution...", "info");
                     router.push(`/prompt/${node.id}?evolve=detailed`);
                   }}
                   className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
-                  title="Detailed"
                 >
                   D
                 </Button>
@@ -436,10 +511,10 @@ export default function EvolutionTree({
                   variant="ghost"
                   onClick={(e) => {
                     e.stopPropagation();
+                    showToast("Opening for manual edit...", "info");
                     router.push(`/prompt/${node.id}?evolve=manual`);
                   }}
                   className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
-                  title="Edit Yourself"
                 >
                   E
                 </Button>
@@ -690,10 +765,81 @@ export default function EvolutionTree({
                   <p className="text-gray-300 text-sm mt-2 line-clamp-2">
                     "{event.content}"
                   </p>
-                  <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
-                    <span>@{formatCreatorName(event.creator)}</span>
-                    <span>👍 {event.likes}</span>
-                    <span>⚡ {event.usage_count}</span>
+                  <div className="flex items-center justify-between mt-2">
+                    <div className="flex items-center gap-3 text-xs text-gray-400">
+                      <span>@{formatCreatorName(event.creator)}</span>
+                      <span>👍 {event.likes}</span>
+                      <span>⚡ {event.usage_count}</span>
+                    </div>
+
+                    {/* Evolution buttons for each node */}
+                    <div className="flex items-center gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigator.clipboard.writeText(event.content);
+                          showToast("Prompt copied to clipboard!", "success");
+                        }}
+                        className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
+                      >
+                        <Copy className="w-3 h-3" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          showToast("Creating creative evolution...", "info");
+                          router.push(`/prompt/${event.id}?evolve=creative`);
+                        }}
+                        className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
+                      >
+                        C
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          showToast(
+                            "Creating professional evolution...",
+                            "info"
+                          );
+                          router.push(
+                            `/prompt/${event.id}?evolve=professional`
+                          );
+                        }}
+                        className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
+                      >
+                        P
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          showToast("Creating detailed evolution...", "info");
+                          router.push(`/prompt/${event.id}?evolve=detailed`);
+                        }}
+                        className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
+                      >
+                        D
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          showToast("Opening for manual edit...", "info");
+                          router.push(`/prompt/${event.id}?evolve=manual`);
+                        }}
+                        className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
+                      >
+                        E
+                      </Button>
+                    </div>
                   </div>
                   {event.isPending && (
                     <div className="flex gap-2 mt-3">
@@ -764,6 +910,24 @@ export default function EvolutionTree({
           {viewMode === "tree" ? <TreeView /> : <LabView />}
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
+          <div
+            className={`
+            px-4 py-2 rounded-lg text-sm font-medium shadow-lg
+            ${
+              toast.type === "success"
+                ? "bg-green-500 text-white"
+                : "bg-blue-500 text-white"
+            }
+          `}
+          >
+            {toast.message}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -227,55 +227,36 @@ export default function PromptCard({
       return;
     }
 
-    setEvolutionLoading(true);
-    setEvolutionResult("");
+    // For manual editing, show the form in modal
+    if (evolutionType === "manual") {
+      setEvolutionLoading(true);
+      setEvolutionResult("");
 
-    try {
-      const response = await fetch("/api/prompts/remix", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          originalPrompt: prompt.text || prompt.content,
-          remixType: evolutionType,
-          parentId: prompt.id,
-        }),
-      });
+      try {
+        const response = await fetch("/api/prompts/remix", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            originalPrompt: prompt.text || prompt.content,
+            remixType: evolutionType,
+            parentId: prompt.id,
+          }),
+        });
 
-      const result = await response.json();
-
-      if (result.isManual) {
+        const result = await response.json();
         setEvolutionResult(result.remixedPrompt);
         setEvolutionLoading(false);
-        return;
+      } catch (error) {
+        console.error("Evolution failed:", error);
+        toast.error("Evolution failed");
+        setEvolutionLoading(false);
       }
-
-      setEvolutionResult(result.remixedPrompt);
-
-      // Save the evolution to the database
-      const saveResponse = await fetch("/api/prompts/save-evolution", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content: result.remixedPrompt,
-          parentId: prompt.id,
-          remixType: evolutionType,
-          generation: (prompt.generation || 0) + 1,
-        }),
-      });
-
-      if (saveResponse.ok) {
-        toast.success("Evolution saved to community!");
-        setShowEvolutionModal(false);
-        setEvolutionResult("");
-        // Redirect to the details page to see the evolution tree for ALL evolution types
-        window.location.href = `/prompt/${prompt.id}`;
-      }
-    } catch (error) {
-      console.error("Evolution failed:", error);
-      toast.error("Evolution failed");
-    } finally {
-      setEvolutionLoading(false);
+      return;
     }
+
+    // For AI evolutions, redirect immediately to tree page with loading state
+    setShowEvolutionModal(false);
+    window.location.href = `/prompt/${prompt.id}?evolve=${evolutionType}`;
   };
 
   return (
