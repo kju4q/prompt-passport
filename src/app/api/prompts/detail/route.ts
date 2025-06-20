@@ -29,7 +29,20 @@ export async function GET(req: Request) {
     if (!prompt) {
       return NextResponse.json({ error: "Prompt not found" }, { status: 404 });
     }
-    return NextResponse.json({ prompt });
+
+    // Transform the data to ensure compatibility with PromptCard
+    const transformedPrompt = {
+      ...prompt,
+      // Ensure we have the expected fields
+      title:
+        prompt.title ||
+        (prompt.text ? prompt.text.slice(0, 50) + "..." : "Untitled Prompt"),
+      content: prompt.content || prompt.text,
+      creator: prompt.creator || prompt.created_by || "Edge Esmeralda",
+      source: prompt.source || prompt.source_tag || "community",
+    };
+
+    return NextResponse.json({ prompt: transformedPrompt });
   } catch (err) {
     return NextResponse.json(
       { error: "Internal server error" },

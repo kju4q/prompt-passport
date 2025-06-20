@@ -8,9 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import PromptCard from "@/components/PromptCard";
 import Link from "next/link";
-import { useVerification } from "@/contexts/VerificationContext";
+import { useSession } from "next-auth/react";
 import PassportIcon from "@/components/ui/passportIcon";
-import Navigation from "@/components/Navigation";
+import BurgerMenu from "@/components/BurgerMenu";
 import { use } from "react";
 import { TreePine, Copy, Heart, Zap } from "lucide-react";
 import EvolutionTree from "@/components/EvolutionTree";
@@ -20,7 +20,7 @@ export default function PromptDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { isVerified } = useVerification();
+  const { data: session } = useSession();
   const [prompt, setPrompt] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -153,8 +153,9 @@ export default function PromptDetailPage({
       {/* Header - Dark Theme */}
       <header className="sticky top-0 z-50 w-full border-b border-gray-800 backdrop-blur-md bg-gray-900/70">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          {/* Logo */}
-          <div className="flex items-center gap-2">
+          {/* Left Side - Burger Menu */}
+          <div className="flex items-center gap-4">
+            <BurgerMenu />
             <Link
               href="/"
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
@@ -163,14 +164,18 @@ export default function PromptDetailPage({
             </Link>
           </div>
 
-          {/* Navigation */}
-          <Navigation />
+          {/* Center Title */}
+          <div className="flex items-center gap-6">
+            <h1 className="text-base font-medium text-gray-300 tracking-wide">
+              Evolution Tree
+            </h1>
+          </div>
 
-          {/* World ID Status */}
+          {/* Right Side - Status */}
           <div>
-            {isVerified ? (
+            {session?.user ? (
               <span className="text-sm text-green-400 font-medium">
-                Verified
+                Signed In
               </span>
             ) : (
               <span className="text-sm text-gray-400 font-medium">

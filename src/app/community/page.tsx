@@ -5,7 +5,7 @@ import PromptGrid from "@/components/PromptGrid";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import PassportIcon from "@/components/ui/passportIcon";
-import Navigation from "@/components/Navigation";
+import BurgerMenu from "@/components/BurgerMenu";
 import { Pin } from "lucide-react";
 
 export default function CommunityPage() {
@@ -39,8 +39,9 @@ export default function CommunityPage() {
       {/* Header - Dark Theme */}
       <header className="sticky top-0 z-50 w-full border-b border-gray-800 backdrop-blur-md bg-gray-900/70">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          {/* Logo */}
-          <div className="flex items-center gap-2">
+          {/* Left Side - Burger Menu */}
+          <div className="flex items-center gap-4">
+            <BurgerMenu />
             <Link
               href="/"
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
@@ -49,11 +50,8 @@ export default function CommunityPage() {
             </Link>
           </div>
 
-          {/* Navigation */}
-          <Navigation />
-
-          {/* World ID Status and Pinned Link */}
-          <div>
+          {/* Right Side - Status and Pin */}
+          <div className="flex items-center gap-4">
             {session?.user ? (
               <span className="text-sm text-green-400 font-medium">
                 Signed In
@@ -63,6 +61,13 @@ export default function CommunityPage() {
                 Guest Mode
               </span>
             )}
+            <Link
+              href="/pinned"
+              title="View pinned prompts"
+              className="flex items-center transition-colors hover:text-white text-gray-400"
+            >
+              <Pin className="h-4 w-4 text-blue-400" />
+            </Link>
           </div>
         </div>
       </header>

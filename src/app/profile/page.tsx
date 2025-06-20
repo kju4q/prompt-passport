@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import PassportIcon from "@/components/ui/passportIcon";
+import BurgerMenu from "@/components/BurgerMenu";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -91,8 +92,9 @@ export default function ProfilePage() {
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b border-gray-800 backdrop-blur-md bg-gray-900/70">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          {/* Logo */}
-          <div className="flex items-center gap-2">
+          {/* Left Side - Burger Menu */}
+          <div className="flex items-center gap-4">
+            <BurgerMenu />
             <Link
               href="/"
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
@@ -106,12 +108,6 @@ export default function ProfilePage() {
             <h1 className="text-base font-medium text-gray-300 tracking-wide">
               Profile
             </h1>
-            <Link
-              href="/community"
-              className="text-sm font-medium text-emerald-400 hover:text-emerald-300 transition-colors"
-            >
-              Edge Esmeralda
-            </Link>
           </div>
 
           {/* Create Button */}

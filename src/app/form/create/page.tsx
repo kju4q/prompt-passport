@@ -2,6 +2,7 @@
 
 import PromptForm from "../PromptForm";
 import PassportIcon from "@/components/ui/passportIcon";
+import BurgerMenu from "@/components/BurgerMenu";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 
@@ -13,8 +14,9 @@ export default function CreatePromptPage() {
       {/* Header - Dark Theme */}
       <header className="sticky top-0 z-50 w-full border-b border-gray-800 backdrop-blur-md bg-gray-900/70">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          {/* Logo */}
-          <div className="flex items-center gap-2">
+          {/* Left Side - Burger Menu */}
+          <div className="flex items-center gap-4">
+            <BurgerMenu />
             <Link
               href="/"
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
@@ -28,12 +30,6 @@ export default function CreatePromptPage() {
             <h1 className="text-base font-medium text-gray-300 tracking-wide">
               Create Prompt
             </h1>
-            <Link
-              href="/community"
-              className="text-sm font-medium text-emerald-400 hover:text-emerald-300 transition-colors"
-            >
-              Edge Esmeralda
-            </Link>
           </div>
 
           {/* Auth Status */}

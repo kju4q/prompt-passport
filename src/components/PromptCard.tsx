@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Copy, Bookmark, Quote, Pin, X } from "lucide-react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 export interface Prompt {
   id: string;
@@ -144,9 +145,17 @@ export default function PromptCard({
 
         {/* Content */}
         <div className="bg-gray-900/50 rounded-lg p-4">
-          <p className="text-gray-300 leading-relaxed">
+          <p className="text-gray-300 leading-relaxed line-clamp-2">
             {prompt.text || prompt.content}
           </p>
+          {(prompt.text || prompt.content)?.length > 100 && (
+            <Link
+              href={`/prompt/${prompt.id}`}
+              className="text-blue-400 hover:text-blue-300 text-sm mt-2 inline-block"
+            >
+              View more...
+            </Link>
+          )}
         </div>
 
         {/* Tags */}
