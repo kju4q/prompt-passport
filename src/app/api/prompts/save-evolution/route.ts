@@ -26,6 +26,7 @@ export async function POST(req: Request) {
           type: "submitted",
           usage_count: 0,
           pin_count: 0,
+          updated_at: new Date().toISOString(),
         },
       ])
       .select();

@@ -43,6 +43,7 @@ export default function PromptForm() {
         user_id: (session?.user as any)?.id || null,
         usage_count: 0,
         pin_count: 0,
+        updated_at: new Date().toISOString(),
       },
     ]);
 

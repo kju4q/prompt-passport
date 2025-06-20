@@ -53,18 +53,21 @@ export async function POST() {
         tags: p.tags,
         source: "AI",
         source_tag: "AI",
-        usage_count: Math.floor(Math.random() * 100),
+        usage_count: 0, // Start with 0, not random number
         creator: "AI",
         created_by: "AI",
         type: "submitted",
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(), // Add updated_at field
       }));
 
+      console.log("🔍 Generate Debug - Data to insert:", promptsToInsert[0]); // Log first prompt
+
       // Insert prompts into database
-      const { error: insertError } = await supabase
+      const { data: insertData, error: insertError } = await supabase
         .from("prompts")
-        .insert(promptsToInsert);
+        .insert(promptsToInsert)
+        .select(); // Add .select() to see what was actually inserted
 
       if (insertError) {
         console.error("Error inserting generated prompts:", insertError);
@@ -75,6 +78,7 @@ export async function POST() {
           promptsToInsert.length,
           "prompts to database"
         );
+        console.log("🔍 Generate Debug - Inserted data:", insertData?.[0]); // Log first inserted prompt
       }
 
       const enriched = promptsToInsert.map((p: any) => ({
