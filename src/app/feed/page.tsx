@@ -7,13 +7,13 @@ import { Heart } from "lucide-react";
 import PassportIcon from "@/components/ui/passportIcon";
 import WorldIDButton from "@/components/WorldIDButton";
 import Link from "next/link";
-import { useVerification } from "@/contexts/VerificationContext";
-import Navigation from "@/components/Navigation";
+import { useSession } from "next-auth/react";
+import BurgerMenu from "@/components/BurgerMenu";
 import type { Prompt } from "@/types/prompt";
 
 export default function HomePage() {
   const router = useRouter();
-  const { isVerified, nullifierHash } = useVerification();
+  const { data: session } = useSession();
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,8 +40,9 @@ export default function HomePage() {
       {/* Header - Dark Theme */}
       <header className="sticky top-0 z-50 w-full border-b border-gray-800 backdrop-blur-md bg-gray-900/70">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          {/* Logo */}
-          <div className="flex items-center gap-2">
+          {/* Left Side - Burger Menu */}
+          <div className="flex items-center gap-4">
+            <BurgerMenu />
             <Link
               href="/"
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
@@ -50,14 +51,18 @@ export default function HomePage() {
             </Link>
           </div>
 
-          {/* Navigation */}
-          <Navigation />
+          {/* Center Title */}
+          <div className="flex items-center gap-6">
+            <h1 className="text-base font-medium text-gray-300 tracking-wide">
+              Feed
+            </h1>
+          </div>
 
-          {/* World ID Status */}
+          {/* Right Side - Status */}
           <div>
-            {isVerified ? (
+            {session?.user ? (
               <span className="text-sm text-green-400 font-medium">
-                Verified
+                Signed In
               </span>
             ) : (
               <span className="text-sm text-gray-400 font-medium">

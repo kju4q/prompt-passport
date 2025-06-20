@@ -13,7 +13,6 @@ export default function BurgerMenu() {
   const { data: session } = useSession();
 
   const menuItems = [
-    { href: "/", label: "Home", icon: Home },
     { href: "/feed", label: "Feed", icon: FileText },
     { href: "/community", label: "Edge Esmeralda", icon: FileText },
     { href: "/form/create", label: "Create Prompt", icon: Plus },
@@ -39,7 +38,12 @@ export default function BurgerMenu() {
           <div className="py-2">
             {menuItems.map((item) => {
               const Icon = item.icon;
-              const isActive = pathname === item.href;
+              const isActive =
+                pathname === item.href ||
+                (item.href === "/pinned" && pathname.startsWith("/pinned")) ||
+                (item.href === "/form/create" &&
+                  pathname.startsWith("/form/create")) ||
+                (item.href === "/prompt" && pathname.startsWith("/prompt"));
 
               return (
                 <Link

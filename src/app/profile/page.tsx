@@ -114,9 +114,9 @@ export default function ProfilePage() {
           <div>
             <Button
               onClick={() => router.push("/form/create")}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-gray-700 hover:bg-gray-600 text-gray-200 text-sm px-3 py-1.5"
             >
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus className="w-3 h-3 mr-1" />
               Create Prompt
             </Button>
           </div>

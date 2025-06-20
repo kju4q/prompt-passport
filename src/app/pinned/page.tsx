@@ -5,7 +5,7 @@ import PromptGrid from "@/components/PromptGrid";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import PassportIcon from "@/components/ui/passportIcon";
-import Navigation from "@/components/Navigation";
+import BurgerMenu from "@/components/BurgerMenu";
 import { Pin } from "lucide-react";
 
 export default function PinnedPage() {
@@ -61,7 +61,6 @@ export default function PinnedPage() {
   if (!session?.user) {
     return (
       <div className="min-h-screen bg-gray-900">
-        <Navigation />
         <div className="max-w-4xl mx-auto px-6 py-16">
           <div className="text-center">
             <Pin className="w-16 h-16 text-gray-600 mx-auto mb-4" />
@@ -85,13 +84,49 @@ export default function PinnedPage() {
 
   return (
     <div className="min-h-screen bg-gray-900">
-      <Navigation />
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      {/* Header - Dark Theme */}
+      <header className="sticky top-0 z-50 w-full border-b border-gray-800 backdrop-blur-md bg-gray-900/70">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+          {/* Left Side - Burger Menu */}
+          <div className="flex items-center gap-4">
+            <BurgerMenu />
+            <Link
+              href="/"
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            >
+              <PassportIcon size="medium" />
+            </Link>
+          </div>
+
+          {/* Center Title */}
+          <div className="flex items-center gap-6">
+            <h1 className="text-base font-medium text-gray-300 tracking-wide">
+              Pinned
+            </h1>
+          </div>
+
+          {/* Right Side - Status */}
+          <div>
+            {session?.user ? (
+              <span className="text-sm text-green-400 font-medium">
+                Signed In
+              </span>
+            ) : (
+              <span className="text-sm text-gray-400 font-medium">
+                Guest Mode
+              </span>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-6 py-8">
         <div className="flex items-center gap-3 mb-8">
-          <Pin className="w-6 h-6 text-yellow-400" />
-          <h1 className="text-3xl font-bold text-gray-200">
+          <Pin className="w-5 h-5 text-yellow-400" />
+          <h2 className="text-xl font-semibold text-gray-200">
             Your Pinned Prompts
-          </h1>
+          </h2>
         </div>
 
         {loading ? (
@@ -127,7 +162,7 @@ export default function PinnedPage() {
         ) : (
           <PromptGrid prompts={prompts} />
         )}
-      </div>
+      </main>
     </div>
   );
 }
