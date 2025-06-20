@@ -60,30 +60,51 @@ export default function PromptCard({
       return;
     }
 
+    console.log("🔍 Pin Debug - Starting pin operation");
+    console.log("🔍 Pin Debug - Session user:", session.user);
+    console.log("🔍 Pin Debug - Prompt ID:", prompt.id);
+    console.log("🔍 Pin Debug - Current pinned state:", pinned);
+    console.log("🔍 Pin Debug - New pin state:", !pinned);
+
     setLoading(true);
     try {
+      const requestBody = {
+        prompt_id: prompt.id,
+        pin: !pinned,
+      };
+
+      console.log("🔍 Pin Debug - Request body:", requestBody);
+
       const response = await fetch("/api/prompts/pin", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          prompt_id: prompt.id,
-          pin: !pinned,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
+      console.log("🔍 Pin Debug - Response status:", response.status);
+      console.log("🔍 Pin Debug - Response ok:", response.ok);
+
       if (response.ok) {
+        const responseData = await response.json();
+        console.log("🔍 Pin Debug - Response data:", responseData);
+
         setPinned(!pinned);
         if (onPin) {
           onPin(prompt.id, !pinned);
         }
         toast.success(pinned ? "Prompt unpinned" : "Prompt pinned!");
       } else {
-        toast.error("Failed to pin prompt");
+        const errorData = await response.json();
+        console.error("🔍 Pin Debug - Error response:", errorData);
+        toast.error(
+          `Failed to pin prompt: ${errorData.error || "Unknown error"}`
+        );
       }
     } catch (error) {
-      toast.error("Failed to pin prompt");
+      console.error("🔍 Pin Debug - Network error:", error);
+      toast.error("Failed to pin prompt - network error");
     } finally {
       setLoading(false);
     }
@@ -104,7 +125,7 @@ export default function PromptCard({
   };
 
   return (
-    <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700/50 hover:border-gray-600/50 transition-all">
+    <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700/50 hover:border-gray-600/50 transition-all mb-6">
       <div className="space-y-4">
         {/* Header */}
         <div className="flex items-start justify-between">

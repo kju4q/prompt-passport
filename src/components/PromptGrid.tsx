@@ -63,6 +63,8 @@ export default function PromptGrid({
         (p) =>
           (p.content &&
             p.content.toLowerCase().includes(searchQuery.toLowerCase())) ||
+          (p.text &&
+            p.text.toLowerCase().includes(searchQuery.toLowerCase())) ||
           (Array.isArray(p.tags) &&
             p.tags.some((tag: string) =>
               tag.toLowerCase().includes(searchQuery.toLowerCase())
@@ -74,22 +76,20 @@ export default function PromptGrid({
 
     // Apply category filter
     if (category === "all") return filtered;
-    if (category === "trending")
-      return filtered.filter((p) => p.usage_count > 30);
-    if (category === "recent")
+    if (category === "popular") {
+      return filtered
+        .slice()
+        .sort((a, b) => (b.usage_count || 0) - (a.usage_count || 0));
+    }
+    if (category === "recent") {
       return filtered
         .slice()
         .sort(
           (a, b) =>
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
-    return filtered.filter(
-      (p) =>
-        Array.isArray(p.tags) &&
-        p.tags.some((tag: string) =>
-          tag.toLowerCase().includes(category.toLowerCase())
-        )
-    );
+    }
+    return filtered;
   };
 
   return (
@@ -119,7 +119,7 @@ export default function PromptGrid({
               All
             </TabsTrigger>
             <TabsTrigger
-              value="trending"
+              value="popular"
               className="rounded-full px-4 py-1.5 text-sm text-gray-300 data-[state=active]:text-white data-[state=active]:bg-gray-700"
             >
               Popular
@@ -129,18 +129,6 @@ export default function PromptGrid({
               className="rounded-full px-4 py-1.5 text-sm text-gray-300 data-[state=active]:text-white data-[state=active]:bg-gray-700"
             >
               Recent
-            </TabsTrigger>
-            <TabsTrigger
-              value="writing"
-              className="rounded-full px-4 py-1.5 text-sm text-gray-300 data-[state=active]:text-white data-[state=active]:bg-gray-700"
-            >
-              Writing
-            </TabsTrigger>
-            <TabsTrigger
-              value="coding"
-              className="rounded-full px-4 py-1.5 text-sm text-gray-300 data-[state=active]:text-white data-[state=active]:bg-gray-700"
-            >
-              Coding
             </TabsTrigger>
           </TabsList>
         </div>
@@ -153,7 +141,7 @@ export default function PromptGrid({
         </div>
 
         <TabsContent value="all">
-          <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {getFilteredPrompts("all").map((prompt) => (
               <PromptCard
                 key={prompt.id}
@@ -165,9 +153,9 @@ export default function PromptGrid({
           </div>
         </TabsContent>
 
-        <TabsContent value="trending">
-          <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6">
-            {getFilteredPrompts("trending").map((prompt) => (
+        <TabsContent value="popular">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {getFilteredPrompts("popular").map((prompt) => (
               <PromptCard
                 key={prompt.id}
                 prompt={prompt}
@@ -179,34 +167,8 @@ export default function PromptGrid({
         </TabsContent>
 
         <TabsContent value="recent">
-          <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {getFilteredPrompts("recent").map((prompt) => (
-              <PromptCard
-                key={prompt.id}
-                prompt={prompt}
-                onPin={handlePinPrompt}
-                isPinned={pinnedIds.includes(Number(prompt.id))}
-              />
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="writing">
-          <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6">
-            {getFilteredPrompts("writing").map((prompt) => (
-              <PromptCard
-                key={prompt.id}
-                prompt={prompt}
-                onPin={handlePinPrompt}
-                isPinned={pinnedIds.includes(Number(prompt.id))}
-              />
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="coding">
-          <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6">
-            {getFilteredPrompts("coding").map((prompt) => (
               <PromptCard
                 key={prompt.id}
                 prompt={prompt}
