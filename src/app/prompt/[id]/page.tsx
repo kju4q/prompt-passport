@@ -225,37 +225,37 @@ export default function PromptDetailPage({
                     onClick={() =>
                       router.push(`/prompt/${promptId}?evolve=creative`)
                     }
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                    className="bg-gray-700 hover:bg-gray-600 text-gray-200"
                     disabled={isEvolving}
                   >
-                    🎨 Creative
+                    Creative
                   </Button>
                   <Button
                     onClick={() =>
                       router.push(`/prompt/${promptId}?evolve=professional`)
                     }
-                    className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white"
+                    className="bg-gray-700 hover:bg-gray-600 text-gray-200"
                     disabled={isEvolving}
                   >
-                    💼 Professional
+                    Professional
                   </Button>
                   <Button
                     onClick={() =>
                       router.push(`/prompt/${promptId}?evolve=detailed`)
                     }
-                    className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                    className="bg-gray-700 hover:bg-gray-600 text-gray-200"
                     disabled={isEvolving}
                   >
-                    📝 Add Details
+                    Add Details
                   </Button>
                   <Button
                     onClick={() =>
                       router.push(`/prompt/${promptId}?evolve=manual`)
                     }
-                    className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white"
+                    className="bg-gray-700 hover:bg-gray-600 text-gray-200"
                     disabled={isEvolving}
                   >
-                    ✏️ Edit Yourself
+                    Edit Yourself
                   </Button>
                 </div>
               </div>
@@ -337,7 +337,7 @@ export default function PromptDetailPage({
                         }}
                         className="bg-green-600 hover:bg-green-700 text-white"
                       >
-                        💾 Save Evolution
+                        Save Evolution
                       </Button>
                       <Button
                         variant="outline"
@@ -348,7 +348,7 @@ export default function PromptDetailPage({
                         }}
                         className="border-gray-600"
                       >
-                        ❌ Cancel
+                        Cancel
                       </Button>
                     </div>
                   </div>

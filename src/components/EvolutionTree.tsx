@@ -401,9 +401,9 @@ export default function EvolutionTree({
                     router.push(`/prompt/${node.id}?evolve=creative`);
                   }}
                   className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
-                  title="Evolve Creative"
+                  title="Creative"
                 >
-                  🎨
+                  C
                 </Button>
                 <Button
                   size="sm"
@@ -413,9 +413,9 @@ export default function EvolutionTree({
                     router.push(`/prompt/${node.id}?evolve=professional`);
                   }}
                   className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
-                  title="Evolve Professional"
+                  title="Professional"
                 >
-                  💼
+                  P
                 </Button>
                 <Button
                   size="sm"
@@ -425,9 +425,9 @@ export default function EvolutionTree({
                     router.push(`/prompt/${node.id}?evolve=detailed`);
                   }}
                   className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
-                  title="Evolve Detailed"
+                  title="Detailed"
                 >
-                  📝
+                  D
                 </Button>
                 <Button
                   size="sm"
@@ -439,7 +439,7 @@ export default function EvolutionTree({
                   className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
                   title="Edit Yourself"
                 >
-                  ✏️
+                  E
                 </Button>
               </div>
             </div>
@@ -450,10 +450,7 @@ export default function EvolutionTree({
               const childAngle =
                 angle +
                 (index - (node.children.length - 1) / 2) * (Math.PI / 4);
-              const childDistance =
-                typeof window !== "undefined" && window.innerWidth < 768
-                  ? 140
-                  : 180;
+              const childDistance = 160; // Fixed distance for better mobile experience
               return (
                 <EvolutionNode
                   key={child.id}
@@ -761,7 +758,7 @@ export default function EvolutionTree({
 
       {/* Tree Container - Make it scrollable for mobile */}
       <div className="w-full overflow-x-auto overflow-y-hidden">
-        <div className="min-w-full min-h-[600px] relative">
+        <div className="min-w-[800px] min-h-[600px] relative px-4">
           {viewMode === "tree" ? <TreeView /> : <LabView />}
         </div>
       </div>

@@ -267,6 +267,8 @@ export default function PromptCard({
         toast.success("Evolution saved to community!");
         setShowEvolutionModal(false);
         setEvolutionResult("");
+        // Redirect to the details page to see the evolution tree
+        window.location.href = `/prompt/${prompt.id}`;
       }
     } catch (error) {
       console.error("Evolution failed:", error);
@@ -417,36 +419,32 @@ export default function PromptCard({
               <Button
                 onClick={() => handleEvolution("creative")}
                 disabled={evolutionLoading}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white justify-start"
+                className="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 justify-start"
               >
-                <span className="mr-3">🎨</span>
                 Creative - Make it more imaginative
               </Button>
 
               <Button
                 onClick={() => handleEvolution("professional")}
                 disabled={evolutionLoading}
-                className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white justify-start"
+                className="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 justify-start"
               >
-                <span className="mr-3">💼</span>
                 Professional - Make it more formal
               </Button>
 
               <Button
                 onClick={() => handleEvolution("detailed")}
                 disabled={evolutionLoading}
-                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white justify-start"
+                className="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 justify-start"
               >
-                <span className="mr-3">📝</span>
                 Add Details - Make it more specific
               </Button>
 
               <Button
                 onClick={() => handleEvolution("manual")}
                 disabled={evolutionLoading}
-                className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white justify-start"
+                className="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 justify-start"
               >
-                <span className="mr-3">✏️</span>
                 Edit Yourself - Customize it manually
               </Button>
             </div>
@@ -487,14 +485,14 @@ export default function PromptCard({
                     }}
                     className="flex-1 bg-green-600 hover:bg-green-700 text-white text-sm"
                   >
-                    💾 Save Evolution
+                    Save Evolution
                   </Button>
                   <Button
                     variant="outline"
                     onClick={() => setEvolutionResult("")}
                     className="border-gray-600 text-gray-400 text-sm"
                   >
-                    ❌ Cancel
+                    Cancel
                   </Button>
                 </div>
               </div>
