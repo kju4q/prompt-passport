@@ -41,7 +41,7 @@ export async function POST(req: Request) {
       const { error } = await supabase
         .from("pinned")
         .upsert([{ prompt_id, user_id: session.user.id }], {
-          onConflict: "prompt_id,user_id",
+          onConflict: "pinned_prompt_id_user_id_key",
         });
 
       console.log("🔍 Pin API Debug - Upsert result error:", error);
