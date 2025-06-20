@@ -27,6 +27,7 @@ export default function PromptDetailPage({
   const router = useRouter();
   const searchParams = useSearchParams();
   const evolveType = searchParams.get("evolve");
+  const parentId = searchParams.get("parent");
   const [viewMode, setViewMode] = useState("tree");
   const [selectedNode, setSelectedNode] = useState(null);
   const [treeData, setTreeData] = useState([]);
@@ -106,7 +107,7 @@ export default function PromptDetailPage({
         body: JSON.stringify({
           originalPrompt: prompt.text || prompt.content,
           remixType: remixType,
-          parentId: prompt.id,
+          parentId: parentId || prompt.id,
         }),
       });
 
@@ -130,7 +131,7 @@ export default function PromptDetailPage({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           content: result.remixedPrompt,
-          parentId: prompt.id,
+          parentId: parentId || prompt.id,
           remixType: remixType,
           generation: (prompt.generation || 0) + 1,
         }),
@@ -139,7 +140,7 @@ export default function PromptDetailPage({
         toast.success("Evolution saved to community!");
         setEvolutionResult("");
         setEvolutionProgress(0);
-        // Remove evolve param from URL
+        // Remove evolve param from URL but keep the original prompt ID
         router.replace(`/prompt/${promptId}`);
         // Reload tree
         loadEvolutionTree(prompt);
@@ -276,7 +277,7 @@ export default function PromptDetailPage({
                               headers: { "Content-Type": "application/json" },
                               body: JSON.stringify({
                                 content: evolutionResult,
-                                parentId: prompt.id,
+                                parentId: parentId || prompt.id,
                                 remixType: "manual",
                                 generation: (prompt.generation || 0) + 1,
                               }),

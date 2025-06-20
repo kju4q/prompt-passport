@@ -281,7 +281,9 @@ export default function EvolutionTree({
                   onClick={(e) => {
                     e.stopPropagation();
                     showToast("Creating creative evolution...", "info");
-                    router.push(`/prompt/${node.id}?evolve=creative`);
+                    router.push(
+                      `/prompt/${promptId}?evolve=creative&parent=${node.id}`
+                    );
                   }}
                   className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
                 >
@@ -293,7 +295,9 @@ export default function EvolutionTree({
                   onClick={(e) => {
                     e.stopPropagation();
                     showToast("Creating professional evolution...", "info");
-                    router.push(`/prompt/${node.id}?evolve=professional`);
+                    router.push(
+                      `/prompt/${promptId}?evolve=professional&parent=${node.id}`
+                    );
                   }}
                   className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
                 >
@@ -305,7 +309,9 @@ export default function EvolutionTree({
                   onClick={(e) => {
                     e.stopPropagation();
                     showToast("Creating detailed evolution...", "info");
-                    router.push(`/prompt/${node.id}?evolve=detailed`);
+                    router.push(
+                      `/prompt/${promptId}?evolve=detailed&parent=${node.id}`
+                    );
                   }}
                   className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
                 >
@@ -317,7 +323,9 @@ export default function EvolutionTree({
                   onClick={(e) => {
                     e.stopPropagation();
                     showToast("Opening for manual edit...", "info");
-                    router.push(`/prompt/${node.id}?evolve=manual`);
+                    router.push(
+                      `/prompt/${promptId}?evolve=manual&parent=${node.id}`
+                    );
                   }}
                   className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
                 >
@@ -476,7 +484,9 @@ export default function EvolutionTree({
                   onClick={(e) => {
                     e.stopPropagation();
                     showToast("Creating creative evolution...", "info");
-                    router.push(`/prompt/${node.id}?evolve=creative`);
+                    router.push(
+                      `/prompt/${promptId}?evolve=creative&parent=${node.id}`
+                    );
                   }}
                   className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
                 >
@@ -488,7 +498,9 @@ export default function EvolutionTree({
                   onClick={(e) => {
                     e.stopPropagation();
                     showToast("Creating professional evolution...", "info");
-                    router.push(`/prompt/${node.id}?evolve=professional`);
+                    router.push(
+                      `/prompt/${promptId}?evolve=professional&parent=${node.id}`
+                    );
                   }}
                   className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
                 >
@@ -500,7 +512,9 @@ export default function EvolutionTree({
                   onClick={(e) => {
                     e.stopPropagation();
                     showToast("Creating detailed evolution...", "info");
-                    router.push(`/prompt/${node.id}?evolve=detailed`);
+                    router.push(
+                      `/prompt/${promptId}?evolve=detailed&parent=${node.id}`
+                    );
                   }}
                   className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
                 >
@@ -512,7 +526,9 @@ export default function EvolutionTree({
                   onClick={(e) => {
                     e.stopPropagation();
                     showToast("Opening for manual edit...", "info");
-                    router.push(`/prompt/${node.id}?evolve=manual`);
+                    router.push(
+                      `/prompt/${promptId}?evolve=manual&parent=${node.id}`
+                    );
                   }}
                   className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
                 >
@@ -792,7 +808,9 @@ export default function EvolutionTree({
                         onClick={(e) => {
                           e.stopPropagation();
                           showToast("Creating creative evolution...", "info");
-                          router.push(`/prompt/${event.id}?evolve=creative`);
+                          router.push(
+                            `/prompt/${promptId}?evolve=creative&parent=${event.id}`
+                          );
                         }}
                         className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
                       >
@@ -808,7 +826,7 @@ export default function EvolutionTree({
                             "info"
                           );
                           router.push(
-                            `/prompt/${event.id}?evolve=professional`
+                            `/prompt/${promptId}?evolve=professional&parent=${event.id}`
                           );
                         }}
                         className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
@@ -821,7 +839,9 @@ export default function EvolutionTree({
                         onClick={(e) => {
                           e.stopPropagation();
                           showToast("Creating detailed evolution...", "info");
-                          router.push(`/prompt/${event.id}?evolve=detailed`);
+                          router.push(
+                            `/prompt/${promptId}?evolve=detailed&parent=${event.id}`
+                          );
                         }}
                         className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
                       >
@@ -833,7 +853,9 @@ export default function EvolutionTree({
                         onClick={(e) => {
                           e.stopPropagation();
                           showToast("Opening for manual edit...", "info");
-                          router.push(`/prompt/${event.id}?evolve=manual`);
+                          router.push(
+                            `/prompt/${promptId}?evolve=manual&parent=${event.id}`
+                          );
                         }}
                         className="h-6 w-6 p-0 hover:bg-gray-700 text-gray-400"
                       >
@@ -904,11 +926,21 @@ export default function EvolutionTree({
         </div>
       </div>
 
-      {/* Tree Container - Make it scrollable for mobile */}
-      <div className="w-full overflow-auto">
-        <div className="min-w-[800px] min-h-[600px] relative p-4 sm:p-8">
-          {viewMode === "tree" ? <TreeView /> : <LabView />}
-        </div>
+      {/* Tree Container - Responsive layout */}
+      <div className="w-full">
+        {viewMode === "tree" ? (
+          /* Tree View - needs horizontal scrolling for the DNA helix layout */
+          <div className="w-full overflow-auto">
+            <div className="min-w-[800px] min-h-[600px] relative p-4 sm:p-8">
+              <TreeView />
+            </div>
+          </div>
+        ) : (
+          /* Lab View - mobile-friendly timeline layout */
+          <div className="w-full px-4 sm:px-8">
+            <LabView />
+          </div>
+        )}
       </div>
 
       {/* Toast Notification */}
