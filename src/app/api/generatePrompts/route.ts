@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
+import { supabase } from "@/lib/supabase";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -42,15 +43,43 @@ export async function POST() {
       if (!jsonString) throw new Error("No JSON array found in the response.");
 
       const json = JSON.parse(jsonString);
-      const enriched = json.map((p: any, index: number) => ({
+
+      // Save generated prompts to database
+      const promptsToInsert = json.map((p: any, index: number) => ({
         id: `${Date.now()}-${index}`,
+        title: p.title,
+        text: p.content,
+        content: p.content,
+        tags: p.tags,
+        source: "AI",
+        source_tag: "AI",
+        usage_count: Math.floor(Math.random() * 100),
+        creator: "AI",
+        created_by: "AI",
+        type: "submitted",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }));
+
+      // Insert prompts into database
+      const { error: insertError } = await supabase
+        .from("prompts")
+        .insert(promptsToInsert);
+
+      if (insertError) {
+        console.error("Error inserting generated prompts:", insertError);
+        // Continue anyway, return the prompts even if database insert fails
+      }
+
+      const enriched = promptsToInsert.map((p: any) => ({
+        id: p.id,
         title: p.title,
         content: p.content,
         tags: p.tags,
         source: "AI",
-        usage_count: Math.floor(Math.random() * 100),
+        usage_count: p.usage_count,
         creator: "AI",
-        created_at: new Date().toISOString(),
+        created_at: p.created_at,
       }));
 
       return NextResponse.json({ prompts: enriched });

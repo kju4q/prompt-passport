@@ -24,6 +24,7 @@ export interface Prompt {
   likes?: number;
   rating?: number;
   title?: string;
+  model_tag?: string;
 }
 
 interface PromptCardProps {
@@ -41,11 +42,17 @@ export default function PromptCard({
   const [copied, setCopied] = useState(false);
   const [pinned, setPinned] = useState(isPinned || false);
   const [loading, setLoading] = useState(false);
+  const [usageCount, setUsageCount] = useState(prompt.usage_count || 0);
 
   // Update local state when isPinned prop changes
   useEffect(() => {
     setPinned(isPinned || false);
   }, [isPinned]);
+
+  // Update usage count when prompt prop changes
+  useEffect(() => {
+    setUsageCount(prompt.usage_count || 0);
+  }, [prompt.usage_count]);
 
   const handleCopy = async () => {
     const textToCopy = prompt.text || prompt.content;
@@ -117,16 +124,74 @@ export default function PromptCard({
 
   const handleUsageIncrement = async () => {
     try {
-      await fetch("/api/prompts/increment-usage", {
+      const response = await fetch("/api/prompts/increment-usage", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ id: prompt.id }),
       });
+
+      if (response.ok) {
+        // Update local usage count immediately
+        setUsageCount((prev) => prev + 1);
+      }
     } catch (error) {
       console.error("Failed to increment usage:", error);
     }
+  };
+
+  const handleUsePrompt = async () => {
+    const promptText = prompt.text || prompt.content;
+
+    // Detect model from tags or model_tag field
+    const modelTag = prompt.model_tag || "";
+    const tags = prompt.tags || [];
+
+    // Check for model indicators in tags or model_tag
+    const isChatGPT =
+      modelTag.toLowerCase().includes("gpt") ||
+      modelTag.toLowerCase().includes("chatgpt") ||
+      tags.some(
+        (tag) =>
+          tag.toLowerCase().includes("gpt") ||
+          tag.toLowerCase().includes("chatgpt")
+      );
+
+    const isClaude =
+      modelTag.toLowerCase().includes("claude") ||
+      tags.some((tag) => tag.toLowerCase().includes("claude"));
+
+    const isGemini =
+      modelTag.toLowerCase().includes("gemini") ||
+      tags.some((tag) => tag.toLowerCase().includes("gemini"));
+
+    // Open appropriate model with the prompt
+    if (isChatGPT) {
+      window.open(
+        `https://chat.openai.com/?prompt=${encodeURIComponent(promptText)}`,
+        "_blank"
+      );
+    } else if (isClaude) {
+      window.open(
+        `https://claude.ai/?prompt=${encodeURIComponent(promptText)}`,
+        "_blank"
+      );
+    } else if (isGemini) {
+      window.open(
+        `https://gemini.google.com/?prompt=${encodeURIComponent(promptText)}`,
+        "_blank"
+      );
+    } else {
+      // Default to ChatGPT if no specific model detected
+      window.open(
+        `https://chat.openai.com/?prompt=${encodeURIComponent(promptText)}`,
+        "_blank"
+      );
+    }
+
+    // Increment usage count
+    await handleUsageIncrement();
   };
 
   return (
@@ -207,7 +272,7 @@ export default function PromptCard({
         {/* Footer */}
         <div className="flex items-center justify-between pt-4 border-t border-gray-700/50">
           <div className="flex items-center gap-4 text-sm text-gray-400">
-            <span>Used {prompt.usage_count} times</span>
+            <span>Used {usageCount} times</span>
             {prompt.likes && <span>❤️ {prompt.likes}</span>}
             {prompt.generation && (
               <span className="text-blue-400">Gen {prompt.generation}</span>
@@ -217,11 +282,8 @@ export default function PromptCard({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => {
-                handleUsageIncrement();
-                handleCopy();
-              }}
-              className="border-gray-600 text-gray-300 hover:bg-gray-700"
+              onClick={handleUsePrompt}
+              className="bg-gray-800/50 border-gray-600 text-gray-300 hover:bg-gray-700 hover:border-gray-500"
             >
               Use Prompt
             </Button>
@@ -231,7 +293,7 @@ export default function PromptCard({
               onClick={() => {
                 window.open(`/prompt/${prompt.id}?evolve=creative`, "_blank");
               }}
-              className="border-emerald-600 text-emerald-400 hover:bg-emerald-700/20"
+              className="bg-gray-800/50 border-emerald-600 text-emerald-400 hover:bg-emerald-700/20 hover:border-emerald-500"
             >
               🧬 Evolve
             </Button>

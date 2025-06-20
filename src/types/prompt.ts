@@ -6,4 +6,5 @@ export interface Prompt {
   usage_count: number;
   tags: string[];
   created_at: string;
+  model_tag?: string;
 }
