@@ -66,20 +66,27 @@ export default function PromptDetailPage({
 
   // Start evolution if evolveType is present
   useEffect(() => {
+    console.log("Evolution useEffect triggered:", {
+      evolveType,
+      parentId,
+      prompt,
+    });
     if (evolveType && prompt && !isEvolving && !evolutionResult) {
       // Set loading state immediately
       setIsEvolving(true);
       setEvolutionProgress(0);
       startEvolution(evolveType);
     }
-  }, [evolveType, prompt]);
+  }, [evolveType, prompt, parentId]);
 
   const loadEvolutionTree = async (rootPrompt: any) => {
     try {
+      console.log("Loading evolution tree for prompt:", rootPrompt.id);
       const res = await fetch(
         `/api/prompts/evolution-tree?id=${rootPrompt.id}`
       );
       const data = await res.json();
+      console.log("Evolution tree data received:", data);
       setEvolutionTree(data.tree || []);
     } catch (err) {
       console.error("Failed to load evolution tree:", err);
@@ -88,6 +95,8 @@ export default function PromptDetailPage({
 
   const startEvolution = async (remixType: string) => {
     // Loading state is already set by the useEffect
+
+    console.log("Starting evolution with:", { remixType, parentId, promptId });
 
     // Progress animation
     const progressInterval = setInterval(() => {
@@ -112,6 +121,7 @@ export default function PromptDetailPage({
       });
 
       const result = await response.json();
+      console.log("Remix result:", result);
 
       // Handle manual editing
       if (result.isManual) {
@@ -136,7 +146,13 @@ export default function PromptDetailPage({
           generation: (prompt.generation || 0) + 1,
         }),
       });
+
+      console.log("Save response status:", saveResponse.status);
+
       if (saveResponse.ok) {
+        const saveResult = await saveResponse.json();
+        console.log("Save result:", saveResult);
+
         toast.success("Evolution saved to community!");
         setEvolutionResult("");
         setEvolutionProgress(0);
@@ -144,9 +160,12 @@ export default function PromptDetailPage({
         router.replace(`/prompt/${promptId}`);
         // Reload tree after a short delay to ensure database is updated
         setTimeout(() => {
+          console.log("Reloading evolution tree...");
           loadEvolutionTree(prompt);
-        }, 500);
+        }, 1000); // Increased delay to ensure database is updated
       } else {
+        const errorText = await saveResponse.text();
+        console.error("Save failed:", errorText);
         toast.error("Failed to save evolution");
       }
     } catch (error) {
