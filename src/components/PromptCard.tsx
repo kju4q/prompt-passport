@@ -109,11 +109,16 @@ export default function PromptCard({
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <h3 className="text-lg font-medium text-gray-200 mb-2">
+            <h3 className="text-lg font-medium text-gray-200 mb-2 line-clamp-1">
               {prompt.title || "Untitled Prompt"}
             </h3>
             <div className="flex items-center gap-2 text-sm text-gray-400">
-              <span>by {prompt.creator}</span>
+              <span>
+                by{" "}
+                {prompt.creator?.startsWith("0x")
+                  ? `User ${prompt.creator.slice(2, 6).toUpperCase()}`
+                  : prompt.creator}
+              </span>
               <span>•</span>
               <span>{new Date(prompt.created_at).toLocaleDateString()}</span>
             </div>

@@ -20,16 +20,24 @@ export async function GET() {
     }
 
     // Transform the data to ensure compatibility with PromptCard
-    const transformedPrompts = prompts.map((prompt: any) => ({
-      ...prompt,
-      // Ensure we have the expected fields
-      title:
-        prompt.title ||
-        (prompt.text ? prompt.text.slice(0, 50) + "..." : "Untitled Prompt"),
-      content: prompt.content || prompt.text,
-      creator: prompt.creator || prompt.created_by || "Edge Esmeralda",
-      source: prompt.source || prompt.source_tag || "community",
-    }));
+    const transformedPrompts = prompts.map((prompt: any) => {
+      // Format creator name consistently
+      let creatorName = prompt.creator || prompt.created_by || "Edge Esmeralda";
+      if (creatorName.startsWith("0x")) {
+        creatorName = `User ${creatorName.slice(2, 6).toUpperCase()}`;
+      }
+
+      return {
+        ...prompt,
+        // Ensure we have the expected fields
+        title:
+          prompt.title ||
+          (prompt.text ? prompt.text.slice(0, 50) + "..." : "Untitled Prompt"),
+        content: prompt.content || prompt.text,
+        creator: creatorName,
+        source: prompt.source || prompt.source_tag || "community",
+      };
+    });
 
     return NextResponse.json({ prompts: transformedPrompts });
   } catch (error) {
