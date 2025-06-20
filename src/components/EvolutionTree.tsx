@@ -52,6 +52,15 @@ export default function EvolutionTree({
     if (creator.startsWith("0x")) {
       return `User ${creator.slice(2, 6).toUpperCase()}`;
     }
+    // Handle community names with acronyms
+    if (creator === "Edge Esmeralda") return "EE";
+    if (creator === "Prompt Passport") return "PP";
+    if (creator === "World App") return "WA";
+    // For other names, take first letter of each word
+    const words = creator.split(" ");
+    if (words.length > 1) {
+      return words.map((word) => word.charAt(0).toUpperCase()).join("");
+    }
     return creator;
   };
 

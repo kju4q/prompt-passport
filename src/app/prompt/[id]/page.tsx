@@ -142,16 +142,13 @@ export default function PromptDetailPage({
         setEvolutionProgress(0);
         // Remove evolve param from URL but keep the original prompt ID
         router.replace(`/prompt/${promptId}`);
-        // Reload tree
-        loadEvolutionTree(prompt);
+        // Reload tree after a short delay to ensure database is updated
+        setTimeout(() => {
+          loadEvolutionTree(prompt);
+        }, 500);
+      } else {
+        toast.error("Failed to save evolution");
       }
-
-      toast.success("Evolution complete!");
-
-      // Reload evolution tree to show new evolution
-      setTimeout(() => {
-        loadEvolutionTree(prompt);
-      }, 1000);
     } catch (error) {
       console.error("Evolution failed:", error);
       toast.error("Evolution failed");
@@ -290,7 +287,12 @@ export default function PromptDetailPage({
                             setEvolutionResult("");
                             setEvolutionProgress(0);
                             router.replace(`/prompt/${promptId}`);
-                            loadEvolutionTree(prompt);
+                            // Reload tree after a short delay to ensure database is updated
+                            setTimeout(() => {
+                              loadEvolutionTree(prompt);
+                            }, 500);
+                          } else {
+                            toast.error("Failed to save manual evolution");
                           }
                         }}
                         className="bg-green-600 hover:bg-green-700 text-white"
