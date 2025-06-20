@@ -48,7 +48,22 @@ export async function POST(req: Request) {
 
       if (error) {
         console.error("🔍 Pin API Debug - Upsert failed:", error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        // Fallback: try insert, ignore if already exists
+        console.log("🔍 Pin API Debug - Trying fallback insert approach");
+        const { error: insertError } = await supabase
+          .from("pinned")
+          .insert([{ prompt_id, user_id: session.user.id }]);
+
+        if (insertError && !insertError.message.includes("duplicate key")) {
+          console.error(
+            "🔍 Pin API Debug - Fallback insert also failed:",
+            insertError
+          );
+          return NextResponse.json(
+            { error: insertError.message },
+            { status: 500 }
+          );
+        }
       }
 
       console.log("🔍 Pin API Debug - Pin successful");
