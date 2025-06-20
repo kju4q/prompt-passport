@@ -294,7 +294,7 @@ export default function PromptCard({
         {/* Footer */}
         <div className="flex items-center justify-between pt-4 border-t border-gray-700/50">
           <div className="flex items-center gap-4 text-sm text-gray-400">
-            <span>Used {usageCount} times</span>
+            <span>Used {usageCount} milionnntimes</span>
             {prompt.likes && <span>❤️ {prompt.likes}</span>}
             {prompt.generation && (
               <span className="text-blue-400">Gen {prompt.generation}</span>
