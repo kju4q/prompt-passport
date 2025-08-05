@@ -72,7 +72,9 @@ export async function GET(req: Request) {
   } catch (error) {
     console.error("User stats API error:", error);
     return NextResponse.json(
-      { error: error?.toString() || "Internal server error" },
+      {
+        error: error instanceof Error ? error.message : "Internal server error",
+      },
       { status: 500 }
     );
   }
