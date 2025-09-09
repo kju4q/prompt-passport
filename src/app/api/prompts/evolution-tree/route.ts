@@ -9,40 +9,66 @@ export async function GET(req: Request) {
   }
 
   try {
-    // Get all evolutions that are descendants of the root prompt
-    // This includes the root prompt and all its children recursively
-    const { data: allPrompts, error } = await supabase
+    // 1) Fetch root prompt
+    const { data: rootPrompt, error: rootError } = await supabase
       .from("prompts")
       .select("*")
-      .or(`id.eq.${id},parent_id.eq.${id}`)
-      .order("generation", { ascending: true });
+      .eq("id", id)
+      .single();
 
-    if (error) {
-      console.error("Database error:", error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (rootError) {
+      if ((rootError as any).code === "PGRST116") {
+        return NextResponse.json({ error: "Prompt not found" }, { status: 404 });
+      }
+      console.error("Root fetch error:", rootError);
+      return NextResponse.json({ error: rootError.message }, { status: 500 });
     }
 
-    if (!allPrompts || allPrompts.length === 0) {
-      return NextResponse.json({
-        tree: [],
-      });
+    if (!rootPrompt) {
+      return NextResponse.json({ error: "Prompt not found" }, { status: 404 });
     }
 
-    // Get all evolutions that have any of the prompts as parent
-    const promptIds = allPrompts.map((p: any) => p.id);
-    const { data: childEvolutions, error: childError } = await supabase
-      .from("prompts")
-      .select("*")
-      .in("parent_id", promptIds)
-      .order("generation", { ascending: true });
+    // 2) Iteratively fetch all descendants (BFS) to any depth
+    const seenIds = new Set<string>([id]);
+    const allNodes: any[] = [rootPrompt];
+    let currentLevel: string[] = [id];
 
-    if (childError) {
-      console.error("Child evolution error:", childError);
-      return NextResponse.json({ error: childError.message }, { status: 500 });
+    // Safety guards to avoid runaway loops
+    const MAX_LEVELS = 20;
+    const MAX_NODES = 2000;
+    let level = 0;
+
+    while (currentLevel.length > 0 && level < MAX_LEVELS && allNodes.length < MAX_NODES) {
+      // Fetch children of all nodes in current level
+      const parentIds = currentLevel.filter(Boolean);
+      if (parentIds.length === 0) break;
+
+      const { data: children, error: fetchError } = await supabase
+        .from("prompts")
+        .select("*")
+        .in("parent_id", parentIds);
+
+      if (fetchError) {
+        console.error("Evolution fetch error (level", level, "):", fetchError);
+        return NextResponse.json({ error: fetchError.message }, { status: 500 });
+      }
+
+      const newChildren = (children || []).filter((c: any) => !seenIds.has(c.id));
+      newChildren.forEach((c: any) => seenIds.add(c.id));
+      allNodes.push(...newChildren);
+      currentLevel = newChildren.map((c: any) => c.id);
+      level += 1;
     }
 
-    // Combine all evolutions
-    const allEvolutions = [...(allPrompts || []), ...(childEvolutions || [])];
+    // 3) Sort by generation then created_at to have stable ordering
+    const allEvolutions = allNodes.sort((a: any, b: any) => {
+      const genA = a.generation ?? 0;
+      const genB = b.generation ?? 0;
+      if (genA !== genB) return genA - genB;
+      const tA = new Date(a.created_at || 0).getTime();
+      const tB = new Date(b.created_at || 0).getTime();
+      return tA - tB;
+    });
 
     // Transform the data to ensure compatibility with PromptCard
     const transformedEvolutions = allEvolutions.map((evolution: any) => ({
@@ -60,6 +86,7 @@ export async function GET(req: Request) {
 
     console.log("Evolution tree data:", {
       rootId: id,
+      levelsFetched: level,
       totalEvolutions: transformedEvolutions.length,
       evolutions: transformedEvolutions.map((e: any) => ({
         id: e.id,

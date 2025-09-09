@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, useParams } from "next/navigation";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,11 +15,7 @@ import { use } from "react";
 import { TreePine, Copy, Heart, Zap } from "lucide-react";
 import EvolutionTree from "@/components/EvolutionTree";
 
-export default function PromptDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function PromptDetailPage() {
   const { data: session } = useSession();
   const [prompt, setPrompt] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -38,9 +34,9 @@ export default function PromptDetailPage({
   const [evolutionResult, setEvolutionResult] = useState<string>("");
   const [evolutionTree, setEvolutionTree] = useState<any[]>([]);
 
-  // Unwrap params using React.use with proper type casting
-  const unwrappedParams = use(params);
-  const promptId = unwrappedParams.id;
+  // Read dynamic route param on client
+  const routeParams = useParams<{ id: string }>();
+  const promptId = routeParams.id;
 
   useEffect(() => {
     const fetchPrompt = async () => {
