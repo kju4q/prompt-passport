@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Copy, Bookmark, Quote, Pin, X } from "lucide-react";
+import { Copy, Pin } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 
