@@ -11,8 +11,6 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import PassportIcon from "@/components/ui/passportIcon";
 import BurgerMenu from "@/components/BurgerMenu";
-import { use } from "react";
-import { TreePine, Copy, Heart, Zap } from "lucide-react";
 import EvolutionTree from "@/components/EvolutionTree";
 
 export default function PromptDetailPage() {
@@ -24,9 +22,6 @@ export default function PromptDetailPage() {
   const searchParams = useSearchParams();
   const evolveType = searchParams.get("evolve");
   const parentId = searchParams.get("parent");
-  const [viewMode, setViewMode] = useState("tree");
-  const [selectedNode, setSelectedNode] = useState(null);
-  const [treeData, setTreeData] = useState([]);
 
   // Evolution states
   const [isEvolving, setIsEvolving] = useState(false);
