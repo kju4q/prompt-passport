@@ -6,6 +6,30 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function POST() {
   try {
+    // 1) Return cached prompts if we already have AI prompts in DB
+    //    This avoids generating on every feed load.
+    const { data: cached, error: cacheError } = await supabase
+      .from("prompts")
+      .select("id, title, content, text, tags, source, usage_count, creator, created_at")
+      .eq("source", "AI")
+      .order("created_at", { ascending: false })
+      .limit(10);
+
+    if (!cacheError && cached && cached.length > 0) {
+      const normalized = cached.map((p: any) => ({
+        id: p.id,
+        title: p.title || (p.text ? String(p.text).slice(0, 50) + "..." : "Untitled"),
+        content: p.content || p.text,
+        tags: p.tags || [],
+        source: p.source || "AI",
+        usage_count: p.usage_count || 0,
+        creator: p.creator || "AI",
+        created_at: p.created_at,
+      }));
+      return NextResponse.json({ prompts: normalized });
+    }
+
+    // 2) Otherwise, generate a fresh batch (first-time bootstrap)
     const prompt = `
     You're a top-tier AI prompt curator for creators, growth hackers, and trend-watchers.
     
@@ -28,12 +52,13 @@ export async function POST() {
     `;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [
         { role: "system", content: "You are a creative prompt engineer." },
         { role: "user", content: prompt },
       ],
-      temperature: 0.9,
+      temperature: 0.8,
+      max_tokens: 1000,
     });
 
     const content = completion.choices[0].message.content;
