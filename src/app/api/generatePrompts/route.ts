@@ -4,6 +4,13 @@ import { supabase } from "@/lib/supabase";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// Keep cached AI prompts fresh without hammering the model
+const CACHE_TTL_HOURS = Number(process.env.PROMPT_CACHE_TTL_HOURS ?? "24");
+const CACHE_TTL_MS =
+  Number.isFinite(CACHE_TTL_HOURS) && CACHE_TTL_HOURS > 0
+    ? CACHE_TTL_HOURS * 60 * 60 * 1000
+    : 24 * 60 * 60 * 1000;
+
 export async function POST() {
   try {
     // 1) Return cached prompts if we already have AI prompts in DB
@@ -16,17 +23,32 @@ export async function POST() {
       .limit(10);
 
     if (!cacheError && cached && cached.length > 0) {
-      const normalized = cached.map((p: any) => ({
-        id: p.id,
-        title: p.title || (p.text ? String(p.text).slice(0, 50) + "..." : "Untitled"),
-        content: p.content || p.text,
-        tags: p.tags || [],
-        source: p.source || "AI",
-        usage_count: p.usage_count || 0,
-        creator: p.creator || "AI",
-        created_at: p.created_at,
-      }));
-      return NextResponse.json({ prompts: normalized });
+      const newestCreatedAt = cached.reduce<string | null>((latest, current) => {
+        if (!current?.created_at) return latest;
+        if (!latest) return current.created_at;
+        return new Date(current.created_at) > new Date(latest)
+          ? current.created_at
+          : latest;
+      }, null);
+
+      const isFresh = !!newestCreatedAt
+        ? Date.now() - new Date(newestCreatedAt).getTime() < CACHE_TTL_MS
+        : false;
+
+      if (isFresh) {
+        const normalized = cached.map((p: any) => ({
+          id: p.id,
+          title:
+            p.title || (p.text ? String(p.text).slice(0, 50) + "..." : "Untitled"),
+          content: p.content || p.text,
+          tags: p.tags || [],
+          source: p.source || "AI",
+          usage_count: p.usage_count || 0,
+          creator: p.creator || "AI",
+          created_at: p.created_at,
+        }));
+        return NextResponse.json({ prompts: normalized });
+      }
     }
 
     // 2) Otherwise, generate a fresh batch (first-time bootstrap)

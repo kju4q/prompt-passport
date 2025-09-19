@@ -1,8 +1,37 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
+import { auth } from "@/app/api/auth";
+
+function isRouteEnabled() {
+  if (process.env.NODE_ENV === "production") return false;
+  return process.env.ENABLE_TEST_DB === "true";
+}
+
+function isAllowedUser(address?: string) {
+  const allowList = process.env.TEST_DB_ALLOWED_ADDRESSES;
+  if (!allowList) return true;
+  const allowed = allowList
+    .split(",")
+    .map((entry) => entry.trim().toLowerCase())
+    .filter(Boolean);
+  if (allowed.length === 0) return true;
+  return address ? allowed.includes(address.toLowerCase()) : false;
+}
 
 export async function GET() {
+  if (!isRouteEnabled()) {
+    // Hide the route entirely when disabled
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
   try {
+    const session = await auth();
+    const walletAddress = (session?.user as any)?.wallet_address;
+
+    if (!walletAddress || !isAllowedUser(walletAddress)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     // Test 1: Basic connection and table existence
     const { data: selectData, error: selectError } = await supabase
       .from("users")
