@@ -23,16 +23,16 @@ export async function POST() {
       .limit(10);
 
     if (!cacheError && cached && cached.length > 0) {
-      const newestCreatedAt = cached.reduce<string | null>((latest, current) => {
+      const newestTimestamp = cached.reduce<number | null>((latest, current) => {
         if (!current?.created_at) return latest;
-        if (!latest) return current.created_at;
-        return new Date(current.created_at) > new Date(latest)
-          ? current.created_at
-          : latest;
+        const currentTime = new Date(String(current.created_at)).getTime();
+        if (Number.isNaN(currentTime)) return latest;
+        if (latest === null) return currentTime;
+        return currentTime > latest ? currentTime : latest;
       }, null);
 
-      const isFresh = !!newestCreatedAt
-        ? Date.now() - new Date(newestCreatedAt).getTime() < CACHE_TTL_MS
+      const isFresh = newestTimestamp !== null
+        ? Date.now() - newestTimestamp < CACHE_TTL_MS
         : false;
 
       if (isFresh) {
