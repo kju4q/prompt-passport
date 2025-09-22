@@ -17,12 +17,20 @@ export default function HomePage() {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [requiresAuth, setRequiresAuth] = useState(false);
 
   useEffect(() => {
     const fetchPrompts = async () => {
       setLoading(true);
+      setError(null);
+      setRequiresAuth(false);
       try {
         const res = await fetch("/api/generatePrompts", { method: "POST" });
+        if (res.status === 401) {
+          setRequiresAuth(true);
+          setPrompts([]);
+          return;
+        }
         if (!res.ok) throw new Error("Failed to fetch prompts");
         const data = await res.json();
         setPrompts(data.prompts);
@@ -75,7 +83,15 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-16">
-        {error ? (
+        {requiresAuth ? (
+          <div className="flex flex-col items-center justify-center gap-4 text-center text-gray-300">
+            <p className="text-lg font-medium">Sign in to fetch fresh prompts.</p>
+            <p className="text-sm text-gray-400 max-w-md">
+              Cached prompts expired. Connect with World ID to generate a new batch and keep exploring the feed.
+            </p>
+            <WorldIDButton />
+          </div>
+        ) : error ? (
           <div className="text-center text-red-400">
             <p>{error}</p>
           </div>
