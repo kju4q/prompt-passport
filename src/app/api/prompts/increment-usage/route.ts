@@ -1,8 +1,18 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
+import { auth } from "@/app/api/auth";
 
 export async function POST(req: Request) {
   try {
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
     const { id } = await req.json();
     console.log("🔍 Increment Usage Debug - Prompt ID:", id);
 

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { supabase } from "@/lib/supabase";
+import { auth } from "@/app/api/auth";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -13,6 +14,8 @@ const CACHE_TTL_MS =
 
 export async function POST() {
   try {
+    const session = await auth();
+
     // 1) Return cached prompts if we already have AI prompts in DB
     //    This avoids generating on every feed load.
     const { data: cached, error: cacheError } = await supabase
@@ -49,6 +52,13 @@ export async function POST() {
         }));
         return NextResponse.json({ prompts: normalized });
       }
+    }
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
     }
 
     // 2) Otherwise, generate a fresh batch (first-time bootstrap)

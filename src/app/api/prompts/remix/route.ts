@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
+import { auth } from "@/app/api/auth";
 
 // Lazy-load OpenAI client to avoid build-time environment variable issues
 function getOpenAI() {
@@ -12,6 +13,15 @@ function getOpenAI() {
 
 export async function POST(req: Request) {
   try {
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
     const { originalPrompt, remixType } = await req.json();
     if (!originalPrompt || !remixType) {
       return NextResponse.json(
